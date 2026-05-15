@@ -30,6 +30,18 @@ run() {
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+assert_clean_except_rust_version_files() {
+  local status path
+  while IFS= read -r status; do
+    [[ -z "$status" ]] && continue
+    path="${status:3}"
+    case "$path" in
+      namzy-rs/Cargo.toml|namzy-rs/Cargo.lock) ;;
+      *) die "Refusing cargo publish with unexpected dirty Rust package file: $path" ;;
+    esac
+  done < <(git status --porcelain -- namzy-rs)
+}
+
 version_from_gitnextver() {
   if [[ -n "${NAMZY_VERSION:-}" ]]; then
     printf "%s\n" "$NAMZY_VERSION"
@@ -86,7 +98,8 @@ pushd namzy-rs >/dev/null
   if [[ -n "$DRY" ]]; then
     cargo publish --dry-run --allow-dirty
   else
-    cargo publish
+    assert_clean_except_rust_version_files
+    cargo publish --allow-dirty
   fi
 popd >/dev/null
 
