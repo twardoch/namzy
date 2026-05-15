@@ -31,7 +31,7 @@ All four implementations behave the same way:
 4. **Timestamp seed.** Seeded by `Date.now()` / `time_ns()` / system clock by default; a caller-supplied seed gives reproducible output.
 5. **Vocabulary.** Basic `A-Za-z` only, drawn from geographic names and common Latin-alphabet words. No diacritics.
 6. **Two modes.**
-   - *Bundled* — compact wordlist shipped with the package; no network.
+   - *Bundled* — shared 300 geographic words x 300 common words (90,000 raw pairings) shipped with every implementation; no network.
    - *Online* — fetches from a public no-auth API; falls back to bundled on failure.
 
 The four implementations are equivalent in spirit, not bit-identical. The TS implementation is the reference for the demo page.

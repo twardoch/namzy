@@ -48,7 +48,7 @@ println!("{}", name); // e.g. "TokyoRiver"
 
 ## Modes
 
-- **Offline** (default): uses bundled wordlist of ~40 geographic names + ~40 common English words.
+- **Offline** (default): uses the shared bundled wordlists of 300 geographic names + 300 common words (90,000 raw pairings).
 - **Online**: fetches from `random-word-api.herokuapp.com`; silently falls back to offline on any error.
 
 ## Output Shapes

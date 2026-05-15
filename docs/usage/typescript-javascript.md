@@ -33,7 +33,7 @@ Use `seed` for repeatable offline generation:
 const name = await generate({ seed: 42 });
 ```
 
-Use `online: true` to request source words from the public random-word API. If the request fails, Namzy falls back to bundled wordlists.
+Use `online: true` to request source words from the public random-word API. If the request fails, Namzy falls back to the shared 300 x 300 bundled wordlists.
 
 ```js
 const name = await generate({ online: true });
@@ -43,7 +43,7 @@ Available options:
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `online` | `boolean` | `false` | Fetch source words online, then fall back to bundled wordlists if needed. |
+| `online` | `boolean` | `false` | Fetch source words online, then fall back to the shared bundled wordlists if needed. |
 | `seed` | `number` | current timestamp | Seed the offline pseudo-random generator. |
 
 The package also exports `joinClean`, `mangle`, `mulberry32`, `GEO`, and `COMMON` for lower-level use.

@@ -54,7 +54,7 @@ name = generate(online=True)
 
 ## Modes
 
-- **Offline** (default): Uses a bundled wordlist of ~40 geographic names and ~40 evocative English nouns. No network required.
+- **Offline** (default): uses the shared bundled wordlists of 300 geographic names and 300 common words (90,000 raw pairings). No network required.
 - **Online**: Fetches two words from `random-word-api.herokuapp.com`. Falls back silently to offline on any error.
 
 ## Mangling

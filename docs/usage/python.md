@@ -33,7 +33,7 @@ Use `seed` for repeatable offline generation:
 print(generate(seed=42))
 ```
 
-Use `online=True` to request source words from the public random-word API. If the request fails, Namzy falls back to bundled wordlists.
+Use `online=True` to request source words from the public random-word API. If the request fails, Namzy falls back to the shared 300 x 300 bundled wordlists.
 
 ```python
 print(generate(online=True))

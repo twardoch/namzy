@@ -13,7 +13,7 @@ Namzy has sibling implementations for TypeScript/JavaScript, Python, Rust, and C
 Each implementation follows the same basic contract:
 
 - output is one fused name token;
-- offline mode uses bundled wordlists;
+- offline mode uses the same bundled 300 geographic words and 300 common words across every implementation, for 90,000 raw pairings;
 - online mode asks a public random-word API for source words and falls back to bundled wordlists if needed;
 - a seed can make library calls repeatable where the implementation exposes one.
 

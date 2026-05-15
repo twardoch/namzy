@@ -67,7 +67,7 @@ QString offline = generator.generateOffline();
 QString online = generator.generateOnline();
 ```
 
-`generateOffline()` uses bundled wordlists. `generateOnline()` uses `QNetworkAccessManager` to request source words from the public random-word API, then falls back to offline generation if the request fails or times out.
+`generateOffline()` uses the shared 300 x 300 bundled wordlists. `generateOnline()` uses `QNetworkAccessManager` to request source words from the public random-word API, then falls back to offline generation if the request fails or times out.
 
 ## CMake embedding example
 

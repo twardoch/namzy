@@ -45,7 +45,7 @@ Choose the page for the language you use:
 - [Rust]({{ '/usage/rust/' | relative_url }})
 - [C++ / Qt 5]({{ '/usage/cpp/' | relative_url }})
 
-All implementations return one fused name token. Offline mode uses bundled wordlists. Online mode asks a public random-word API for source words and falls back to bundled wordlists if the request fails.
+All implementations return one fused name token. Offline mode uses the same bundled 300 geographic words and 300 common words across every implementation, for 90,000 raw source-word pairings. Online mode asks a public random-word API for source words and falls back to bundled wordlists if the request fails.
 
 <script src="{{ '/namzy.js' | relative_url }}"></script>
 <script>

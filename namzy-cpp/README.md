@@ -46,6 +46,6 @@ cmake -S . -B build && cmake --build build
 
 ## Notes
 
-- Offline mode uses a bundled wordlist (~40 geographic + ~40 common words).
+- Offline mode uses the shared bundled wordlists (300 geographic + 300 common words, 90,000 raw pairings).
 - Online mode hits `https://random-word-api.herokuapp.com/word?number=2&length=6` with a 3-second timeout and falls back to offline on failure.
 - A light phonetic mangling pass is applied (e.g. `Boys→Boyz`, `ks→x`, `ph→f`).

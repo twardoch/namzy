@@ -59,7 +59,7 @@ let name = generate(&Options {
 });
 ```
 
-If the online request fails, Namzy falls back to bundled wordlists.
+If the online request fails, Namzy falls back to the shared 300 x 300 bundled wordlists.
 
 The crate also exposes `join_clean()` and `Mulberry32` for lower-level use.
 
