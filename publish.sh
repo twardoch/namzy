@@ -109,12 +109,16 @@ say "Building all packages"
 say "Publishing namzy-ts → npm"
 pushd namzy-ts >/dev/null
   have npm || die "npm not found"
+  npm_publish_args=(--access public)
+  if [[ -n "${NPM_OTP:-}" ]]; then
+    npm_publish_args+=(--otp "$NPM_OTP")
+  fi
   if [[ -n "$DRY" ]]; then
-    npm publish --dry-run --access public
+    npm publish --dry-run "${npm_publish_args[@]}"
   elif npm_version_exists; then
     warn "@twardoch/namzy@$VERSION already exists on npm — skipping"
   else
-    npm publish --access public
+    npm publish "${npm_publish_args[@]}"
   fi
 popd >/dev/null
 
