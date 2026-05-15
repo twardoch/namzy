@@ -19,28 +19,40 @@ The four are siblings, not a monorepo with shared code. Each must stand alone as
 
 ## Algorithm contract (shared across all four)
 
-Every implementation generates **single-word human-friendly project names** with these properties:
+Output is **always one fused token** that looks like a single word but is two words spliced together and mangled. There is **no** shape option.
 
-1. **Reasonably unique, seeded by the current timestamp** — same instant should not need to collide, but cryptographic uniqueness is not required.
-2. **Output shape is user-selectable**: `Singleword`, `TwoWordPhrase` (camel/pascal joined), or `"Two Word"` (space-separated). The choice is an input, not a fixed output.
-3. **Source vocabulary**: geographic names or common words from English / other Latin-alphabet languages. **Basic A–Za–z only — no diacritics, no special characters.**
-4. **Phonetic transformation pass**: the raw word is mangled into something playful (the spec's example: `Boys` → `Boyz`). Each implementation invents its own small set of substitutions; they need not match across languages.
-5. **Two operating modes, both required**:
-   - **Self-contained** — bundled wordlist, no network.
-   - **Online** — pulls from a public, no-auth, high-availability API.
+1. Pick two words from the vocabulary (one geo + one common offline, or two from the online API). Lowercase both.
+2. Junction cleanup at the seam, up to two passes:
+   - if `last(word1) == first(word2)` → drop `first(word2)`
+   - else if both are vowels (`a e i o u y`) → drop `first(word2)`
+3. Concatenate without separator.
+4. Consonant rotation (case-preserving, per letter): `c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u`.
+5. Capitalize first letter only.
 
-The spec explicitly states: *"Not every implementation must yield identical results."* Do not over-engineer cross-language determinism. Keep the code simple.
+Seeded by current timestamp or caller-supplied integer. Vocabulary is basic `A–Za–z` only.
 
-## Repository layout to create
+Two modes required:
+- **Self-contained** — bundled wordlist, no network.
+- **Online** — public no-auth API; falls back to bundled on failure.
+
+The spec explicitly states: *"Not every implementation must yield identical results."* Keep the code simple.
+
+## Repository layout
 
 ```
 namzy/
-├── README.md              # explains objective + the four deliverables
+├── README.md              # user-facing description
+├── INIT.md                # canonical spec
 ├── LICENSE                # MIT
-├── namzy-ts/
-├── namzy-py/
-├── namzy-cpp/
-└── namzy-rs/
+├── build.sh               # builds all four packages
+├── publish.sh             # publishes TS → npm, Py → PyPI, Rs → crates
+├── docs/                  # GitHub Pages demo built from TS impl
+│   ├── index.html
+│   └── namzy.js           # esbuild IIFE bundle of namzy-ts
+├── namzy-ts/              # publishes to npm
+├── namzy-py/              # publishes to PyPI
+├── namzy-cpp/             # builds binary only
+└── namzy-rs/              # publishes to crates.io
 ```
 
 License is MIT for the whole project.
