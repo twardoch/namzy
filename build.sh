@@ -12,13 +12,33 @@ die() { printf "%sxxx %s%s\n" "$RED" "$1" "$RESET" >&2; exit 1; }
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+current_package_version() {
+  python3 - <<'PY_VERSION'
+import json
+from pathlib import Path
+print("v" + json.loads(Path("namzy-ts/package.json").read_text())["version"])
+PY_VERSION
+}
+
 version_from_gitnextver() {
   if [[ -n "${NAMZY_VERSION:-}" ]]; then
     printf "%s\n" "$NAMZY_VERSION"
     return
   fi
   have uvx || die "uvx not found; install uv or set NAMZY_VERSION=vX.Y.Z"
-  uvx gitnextver
+  local output version
+  output="$(uvx gitnextver 2>&1 || true)"
+  version="$(printf "%s\n" "$output" | grep -Eo 'v?[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?' | tail -n 1 || true)"
+  if [[ -n "$version" ]]; then
+    printf "%s\n" "$version"
+    return
+  fi
+  if printf "%s\n" "$output" | grep -qi "No changes to commit"; then
+    current_package_version
+    return
+  fi
+  printf "%s\n" "$output" >&2
+  die "gitnextver did not return a semver string; set NAMZY_VERSION=vX.Y.Z to override"
 }
 
 say "Synchronizing package versions"

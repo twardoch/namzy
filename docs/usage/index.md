@@ -19,7 +19,7 @@ Each implementation follows the same basic contract:
 
 Choose a language:
 
-- [TypeScript / JavaScript]({{ '/usage/typescript-javascript/' | relative_url }})
+- [JavaScript]({{ '/usage/javascript/' | relative_url }})
 - [Python]({{ '/usage/python/' | relative_url }})
 - [Rust]({{ '/usage/rust/' | relative_url }})
-- [C++ / Qt 5]({{ '/usage/cpp/' | relative_url }})
+- [C++]({{ '/usage/cpp/' | relative_url }})

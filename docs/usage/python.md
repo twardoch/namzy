@@ -1,7 +1,8 @@
 ---
 title: Python
 permalink: /usage/python/
-nav_order: 3
+parent: Usage
+nav_order: 2
 ---
 
 # Python

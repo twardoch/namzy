@@ -1,7 +1,8 @@
 ---
 title: C++
 permalink: /usage/cpp/
-nav_order: 5
+parent: Usage
+nav_order: 4
 ---
 
 # C++

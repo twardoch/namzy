@@ -1,7 +1,8 @@
 ---
 title: JavaScript
 permalink: /usage/javascript/
-nav_order: 2
+parent: Usage
+nav_order: 1
 ---
 
 # JavaScript

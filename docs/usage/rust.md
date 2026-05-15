@@ -1,7 +1,8 @@
 ---
 title: Rust
 permalink: /usage/rust/
-nav_order: 4
+parent: Usage
+nav_order: 3
 ---
 
 # Rust

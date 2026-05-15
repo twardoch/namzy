@@ -35,10 +35,10 @@ has_toc: false
 
 Choose the page for the language you use:
 
-- [TypeScript / JavaScript]({{ '/usage/typescript-javascript/' | relative_url }})
+- [JavaScript]({{ '/usage/javascript/' | relative_url }})
 - [Python]({{ '/usage/python/' | relative_url }})
 - [Rust]({{ '/usage/rust/' | relative_url }})
-- [C++ / Qt 5]({{ '/usage/cpp/' | relative_url }})
+- [C++]({{ '/usage/cpp/' | relative_url }})
 
 All implementations return one fused name token. Namzy uses the same bundled 300 geographic words and 300 common words across every implementation, and can join them in either order. That makes 180,000 raw ordered source-word pairings before seam cleanup and consonant rotation.
 

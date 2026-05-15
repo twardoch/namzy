@@ -41,7 +41,6 @@ defaults:
       path: "usage"
     values:
       layout: page
-      parent: Usage
 
 exclude:
   - Gemfile
