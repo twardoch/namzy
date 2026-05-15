@@ -8,7 +8,7 @@ remote_theme: just-the-docs/just-the-docs@v0.12.0
 repository: twardoch/namzy
 
 color_scheme: light
-search_enabled: true
+search_enabled: false
 heading_anchors: true
 
 aux_links:
@@ -37,11 +37,6 @@ defaults:
       path: ""
     values:
       layout: page
-  - scope:
-      path: "usage"
-    values:
-      layout: page
-      has_toc: true
 
 exclude:
   - Gemfile

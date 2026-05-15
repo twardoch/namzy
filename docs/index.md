@@ -3,7 +3,6 @@ layout: page
 title: namzy
 description: Fun, fused, mangled project names.
 permalink: /
-nav_order: 1
 has_toc: false
 ---
 
@@ -14,47 +13,108 @@ has_toc: false
 </section>
 
 <section class="namzy-demo" aria-labelledby="demo-title">
-  <h2 id="demo-title">Try the generator</h2>
+  <div class="namzy-demo__head">
+    <div>
+      <p class="namzy-demo__eyebrow">Generator</p>
+      <h2 id="demo-title">Make a short list</h2>
+    </div>
+    <button id="go" type="button">Generate</button>
+  </div>
   <fieldset>
-    <legend>Options</legend>
     <div class="namzy-demo__controls">
-      <label>
-        Count
+      <label class="namzy-demo__field">
+        <span>Count</span>
         <input type="number" id="count" min="1" max="50" value="6">
       </label>
       <label class="namzy-demo__check">
         <input type="checkbox" id="online">
-        Online mode
+        <span>Online words</span>
       </label>
-      <button id="go" type="button">Generate</button>
     </div>
   </fieldset>
-  <ul class="namzy-demo__names" id="out" aria-live="polite"></ul>
+  <label class="namzy-demo__output">
+    <span>Names</span>
+    <textarea id="out" rows="8" readonly spellcheck="false" aria-live="polite"></textarea>
+  </label>
   <p class="namzy-note">Online mode asks a public random-word API for source words and falls back to bundled wordlists if the request fails.</p>
 </section>
 
 <p class="namzy-note">Mangling rotates <code>c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u</code>. Junction cleanup drops a duplicate letter or a vowel-on-vowel clash at the seam.</p>
 
-## Use namzy anywhere
+## Install
 
-<div class="namzy-card-grid">
-  <a class="namzy-card" href="{{ '/usage/typescript-javascript/' | relative_url }}">
-    <h3>TypeScript / JavaScript</h3>
-    <p>Install <code>@twardoch/namzy</code>, import <code>generate</code>, or run the <code>namzy</code> CLI with Node 18+.</p>
-  </a>
-  <a class="namzy-card" href="{{ '/usage/python/' | relative_url }}">
-    <h3>Python</h3>
-    <p>Install <code>namzy</code> from PyPI, call <code>generate()</code>, or use the console command.</p>
-  </a>
-  <a class="namzy-card" href="{{ '/usage/rust/' | relative_url }}">
-    <h3>Rust</h3>
-    <p>Add the <code>namzy</code> crate, call <code>generate(&Options)</code>, or install the binary.</p>
-  </a>
-  <a class="namzy-card" href="{{ '/usage/cpp-qt5/' | relative_url }}">
-    <h3>C++ / Qt 5</h3>
-    <p>Build the Qt5-compatible C++ implementation and embed <code>Namzy</code> in Qt apps.</p>
-  </a>
-</div>
+```bash
+npm install @twardoch/namzy
+python -m pip install namzy
+cargo add namzy
+```
+
+For C++ / Qt 5, build the source package:
+
+```bash
+cmake -S namzy-cpp -B namzy-cpp/build
+cmake --build namzy-cpp/build
+```
+
+## Use
+
+### TypeScript / JavaScript
+
+```js
+import { generate } from "@twardoch/namzy";
+
+console.log(await generate({ seed: 42 }));
+```
+
+CLI:
+
+```bash
+npx @twardoch/namzy --count 5
+```
+
+### Python
+
+```python
+from namzy import generate
+
+print(generate(seed=42))
+```
+
+CLI:
+
+```bash
+namzy --count 5 --seed 42
+```
+
+### Rust
+
+```rust
+use namzy::{generate, Options};
+
+fn main() {
+    let name = generate(&Options { online: false, seed: Some(42) });
+    println!("{name}");
+}
+```
+
+CLI:
+
+```bash
+cargo install namzy
+namzy --count 5 --seed 42
+```
+
+### C++ / Qt 5
+
+```cpp
+#include "namzy.h"
+
+Namzy generator(42);
+QString offline = generator.generateOffline();
+QString online = generator.generateOnline();
+```
+
+Link against Qt 5 Core and Network.
 
 <script src="{{ '/namzy.js' | relative_url }}"></script>
 <script>
@@ -63,22 +123,20 @@ has_toc: false
   const btn = $("go");
 
   async function run() {
-    out.innerHTML = "";
+    out.value = "";
     const count = Math.max(1, Math.min(50, parseInt($("count").value, 10) || 1));
     const online = $("online").checked;
     const base = Date.now();
     btn.disabled = true;
     try {
+      const names = [];
       for (let i = 0; i < count; i++) {
         const name = await namzy.generate({ online, seed: base + i * 1337 });
-        const li = document.createElement("li");
-        li.textContent = name;
-        out.appendChild(li);
+        names.push(name);
       }
+      out.value = names.join("\n");
     } catch (e) {
-      const li = document.createElement("li");
-      li.textContent = "Error: " + e.message;
-      out.appendChild(li);
+      out.value = "Error: " + e.message;
     } finally {
       btn.disabled = false;
     }
