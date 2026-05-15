@@ -1,0 +1,51 @@
+title: namzy
+tagline: Fun fused project names
+description: Generate human-friendly project names by fusing two words, cleaning the seam, and rotating consonants.
+url: https://twardoch.github.io
+baseurl: /namzy
+
+remote_theme: just-the-docs/just-the-docs@v0.12.0
+repository: twardoch/namzy
+
+color_scheme: light
+search_enabled: true
+heading_anchors: true
+
+aux_links:
+  GitHub: https://github.com/twardoch/namzy
+aux_links_new_tab: true
+
+gh_edit_link: true
+gh_edit_link_text: Edit this page on GitHub
+gh_edit_repository: https://github.com/twardoch/namzy
+gh_edit_branch: main
+gh_edit_source: docs
+gh_edit_view_mode: tree
+
+footer_content: "Copyright &copy; Adam Twardoch. Distributed under the MIT license."
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-remote-theme
+
+lang: en
+timezone: Europe/Warsaw
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: page
+  - scope:
+      path: "usage"
+    values:
+      layout: page
+      has_toc: true
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
+  - node_modules

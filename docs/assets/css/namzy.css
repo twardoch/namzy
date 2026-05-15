@@ -1,0 +1,119 @@
+.namzy-hero {
+  display: grid;
+  gap: 1.5rem;
+  margin: 1rem 0 2.5rem;
+}
+
+.namzy-hero__lede {
+  color: var(--text-muted-color, #6c757d);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.namzy-demo {
+  border: 1px solid var(--main-border-color, rgba(127, 127, 127, 0.22));
+  border-radius: 1rem;
+  padding: 1.25rem;
+  background: var(--card-bg, rgba(127, 127, 127, 0.06));
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.06);
+}
+
+.namzy-demo fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.namzy-demo legend {
+  color: var(--text-muted-color, #6c757d);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.namzy-demo__controls {
+  align-items: end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1rem;
+}
+
+.namzy-demo label {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.namzy-demo input[type="number"] {
+  max-width: 7rem;
+}
+
+.namzy-demo__check {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  min-height: 2.4rem;
+}
+
+.namzy-demo button {
+  background: var(--link-color, #2a66ff);
+  border: 0;
+  border-radius: 0.5rem;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+}
+
+.namzy-demo button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.namzy-demo__names {
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+}
+
+.namzy-demo__names li {
+  background: var(--main-bg, #fff);
+  border: 1px solid var(--main-border-color, rgba(127, 127, 127, 0.16));
+  border-radius: 0.65rem;
+  font: 1.15rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding: 0.55rem 0.7rem;
+}
+
+.namzy-note {
+  color: var(--text-muted-color, #6c757d);
+  font-size: 0.9rem;
+  margin: 1rem 0 0;
+}
+
+.namzy-card-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  margin: 1.5rem 0 2rem;
+}
+
+.namzy-card {
+  border: 1px solid var(--main-border-color, rgba(127, 127, 127, 0.2));
+  border-radius: 0.85rem;
+  padding: 1rem;
+}
+
+.namzy-card h3 {
+  margin-top: 0;
+}
+
+.namzy-card p {
+  color: var(--text-muted-color, #6c757d);
+  margin-bottom: 0;
+}
