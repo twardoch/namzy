@@ -1,0 +1,33 @@
+{
+  "name": "namzy",
+  "version": "0.1.0",
+  "description": "Generates fun fused human-friendly project names",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "namzy": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:web": "esbuild src/web.ts --bundle --format=iife --global-name=namzy --outfile=../docs/namzy.js --target=es2020",
+    "start": "node dist/cli.js",
+    "dev": "tsx src/cli.ts"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

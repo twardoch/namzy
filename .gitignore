@@ -1,0 +1,52 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# Node / TS (namzy-ts/)
+node_modules/
+dist/
+*.tsbuildinfo
+.npm/
+
+# Python (namzy-py/)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+*.whl
+*.tar.gz
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Rust (namzy-rs/)
+target/
+Cargo.lock.bak
+
+# C++ (namzy-cpp/)
+build/
+*.o
+*.obj
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Generated web bundle (committed deliberately, but ignore source maps)
+docs/*.map
+
+# Tooling state
+.claude/
+.omc/
+agentdb.rvf*
+ruvector.db

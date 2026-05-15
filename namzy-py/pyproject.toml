@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "namzy"
+version = "0.1.0"
+description = "Generate fun human-friendly project names"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = ["name", "generator", "project", "fun"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.scripts]
+namzy = "namzy.cli:main"
+
+[tool.hatch.version]
+path = "src/namzy/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/namzy"]

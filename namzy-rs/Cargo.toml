@@ -1,0 +1,18 @@
+[package]
+name = "namzy"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Generates fun human-friendly project names"
+
+[lib]
+name = "namzy"
+path = "src/lib.rs"
+
+[[bin]]
+name = "namzy"
+path = "src/main.rs"
+
+[dependencies]
+ureq = { version = "2", features = ["json"] }
+clap = { version = "4", features = ["derive"] }
