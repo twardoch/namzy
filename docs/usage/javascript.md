@@ -1,10 +1,10 @@
 ---
-title: TypeScript / JavaScript
-permalink: /usage/typescript-javascript/
-nav_order: 1
+title: JavaScript
+permalink: /usage/javascript/
+nav_order: 2
 ---
 
-# TypeScript / JavaScript
+# JavaScript
 
 The npm package is `@twardoch/namzy`. It is an ES module package for Node.js 18 and newer.
 

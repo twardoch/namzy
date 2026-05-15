@@ -30,6 +30,20 @@ run() {
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+version_from_gitnextver() {
+  if [[ -n "${NAMZY_VERSION:-}" ]]; then
+    printf "%s\n" "$NAMZY_VERSION"
+    return
+  fi
+  have uvx || die "uvx not found; install uv or set NAMZY_VERSION=vX.Y.Z"
+  uvx gitnextver
+}
+
+say "Synchronizing package versions"
+VERSION_TAG="$(version_from_gitnextver)"
+NAMZY_VERSION="$VERSION_TAG" python3 "$ROOT/scripts/sync_version.py" "$VERSION_TAG"
+export NAMZY_VERSION="$VERSION_TAG"
+
 # Build everything first so we publish from fresh artifacts.
 say "Building all packages"
 "$ROOT/build.sh"

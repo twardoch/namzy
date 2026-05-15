@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "namzy"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Generate fun human-friendly project names"
 readme = "README.md"
 license = { text = "MIT" }
@@ -22,7 +22,7 @@ classifiers = [
 namzy = "namzy.cli:main"
 
 [tool.hatch.version]
-path = "src/namzy/__init__.py"
+path = "src/namzy/__version__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/namzy"]

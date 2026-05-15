@@ -9,9 +9,12 @@ import time
 from ._mangle import join_clean, mangle
 from ._wordlist import COMMON, GEO
 
-__version__ = "0.2.0"
+try:
+    from .__version__ import __version__
+except ModuleNotFoundError:
+    __version__ = "0+unknown"
 
-__all__ = ["generate"]
+__all__ = ["generate", "__version__"]
 
 def _pick_words(rng: random.Random) -> tuple[str, str]:
     """Return two raw lowercase words in a random order."""

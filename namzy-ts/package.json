@@ -1,13 +1,13 @@
 {
   "name": "@twardoch/namzy",
-  "version": "0.1.0",
+  "version": "1.0.9",
   "description": "Generates fun fused human-friendly project names",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "namzy": "./dist/cli.js"
+    "namzy": "dist/cli.js"
   },
   "files": [
     "dist",

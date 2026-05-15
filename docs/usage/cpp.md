@@ -1,10 +1,10 @@
 ---
-title: C++ / Qt 5
+title: C++
 permalink: /usage/cpp/
-nav_order: 4
+nav_order: 5
 ---
 
-# C++ / Qt 5
+# C++
 
 The C++ implementation lives in `namzy-cpp`. It is a Qt 5 project that links against Qt Core.
 

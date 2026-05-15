@@ -12,6 +12,20 @@ die() { printf "%sxxx %s%s\n" "$RED" "$1" "$RESET" >&2; exit 1; }
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+version_from_gitnextver() {
+  if [[ -n "${NAMZY_VERSION:-}" ]]; then
+    printf "%s\n" "$NAMZY_VERSION"
+    return
+  fi
+  have uvx || die "uvx not found; install uv or set NAMZY_VERSION=vX.Y.Z"
+  uvx gitnextver
+}
+
+say "Synchronizing package versions"
+VERSION_TAG="$(version_from_gitnextver)"
+NAMZY_VERSION="$VERSION_TAG" python3 "$ROOT/scripts/sync_version.py" "$VERSION_TAG"
+export NAMZY_VERSION="$VERSION_TAG"
+
 # --- TypeScript -----------------------------------------------------------
 say "Building namzy-ts (npm)"
 pushd namzy-ts >/dev/null
@@ -19,11 +33,13 @@ pushd namzy-ts >/dev/null
   npm install --no-audit --no-fund
   npm run build
   npm run build:web
+  ruby -e 'path="../docs/namzy.js"; text=File.read(path); header="/* biome-ignore-all lint: generated browser bundle */\n"; File.write(path, header + text.sub(%r{\A/\* biome-ignore-all lint: generated browser bundle \*/\n}, ""))'
 popd >/dev/null
 
 # --- Python ---------------------------------------------------------------
 say "Building namzy-py (wheel + sdist)"
 pushd namzy-py >/dev/null
+  rm -rf dist
   if have uv; then
     uv build
   elif have python3; then

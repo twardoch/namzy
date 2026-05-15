@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 {
     QCoreApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("namzy"));
-    app.setApplicationVersion(QStringLiteral("1.0.0"));
+    app.setApplicationVersion(QStringLiteral(NAMZY_VERSION));
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("Generate fun human-friendly project names."));
