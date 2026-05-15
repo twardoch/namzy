@@ -1,4 +1,3 @@
-/* biome-ignore-all lint: generated browser bundle */
 "use strict";
 var namzy = (() => {
   var __defProp = Object.defineProperty;
