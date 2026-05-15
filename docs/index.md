@@ -20,10 +20,6 @@ has_toc: false
         <span>Count</span>
         <input type="number" id="count" min="1" max="50" value="6">
       </label>
-      <label class="namzy-demo__check">
-        <input type="checkbox" id="online">
-        <span>Online words</span>
-      </label>
     </div>
   </fieldset>
   <button id="go" type="button">Generate</button>
@@ -31,7 +27,6 @@ has_toc: false
     <span>Names</span>
     <textarea id="out" rows="8" readonly spellcheck="false" aria-live="polite"></textarea>
   </label>
-  <p class="namzy-note">Online mode asks a public random-word API for source words and falls back to bundled wordlists if the request fails.</p>
 </section>
 
 <p class="namzy-note">Mangling rotates <code>c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u</code>. Junction cleanup drops a duplicate letter or a vowel-on-vowel clash at the seam.</p>
@@ -45,7 +40,7 @@ Choose the page for the language you use:
 - [Rust]({{ '/usage/rust/' | relative_url }})
 - [C++ / Qt 5]({{ '/usage/cpp/' | relative_url }})
 
-All implementations return one fused name token. Offline mode uses the same bundled 300 geographic words and 300 common words across every implementation, for 90,000 raw source-word pairings. Online mode asks a public random-word API for source words and falls back to bundled wordlists if the request fails.
+All implementations return one fused name token. Namzy uses the same bundled 300 geographic words and 300 common words across every implementation, and can join them in either order. That makes 180,000 raw ordered source-word pairings before seam cleanup and consonant rotation.
 
 <script src="{{ '/namzy.js' | relative_url }}"></script>
 <script>
@@ -56,13 +51,12 @@ All implementations return one fused name token. Offline mode uses the same bund
   async function run() {
     out.value = "";
     const count = Math.max(1, Math.min(50, parseInt($("count").value, 10) || 1));
-    const online = $("online").checked;
     const base = Date.now();
     btn.disabled = true;
     try {
       const names = [];
       for (let i = 0; i < count; i++) {
-        const name = await namzy.generate({ online, seed: base + i * 1337 });
+        const name = await namzy.generate({ seed: base + i * 1337 });
         names.push(name);
       }
       out.value = names.join("\n");

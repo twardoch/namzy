@@ -17,11 +17,6 @@ int main(int argc, char* argv[])
     parser.addHelpOption();
     parser.addVersionOption();
 
-    QCommandLineOption onlineOpt(
-        QStringLiteral("online"),
-        QStringLiteral("Fetch words from a public API (falls back to offline on failure)."));
-    parser.addOption(onlineOpt);
-
     QCommandLineOption countOpt(
         QStringLiteral("count"),
         QStringLiteral("Number of names to generate (default: 1)."),
@@ -55,13 +50,10 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    bool useOnline = parser.isSet(onlineOpt);
-
     QTextStream out(stdout);
     for (int i = 0; i < count; ++i) {
         Namzy namzy(seed + static_cast<quint64>(i));
-        QString name = useOnline ? namzy.generateOnline()
-                                 : namzy.generateOffline();
+        QString name = namzy.generate();
         out << name << "\n";
     }
 

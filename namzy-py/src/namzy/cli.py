@@ -15,12 +15,6 @@ def main() -> None:
         description="Generate fun human-friendly project names.",
     )
     parser.add_argument(
-        "--online",
-        action="store_true",
-        default=False,
-        help="Fetch words from a public API (falls back to offline on error)",
-    )
-    parser.add_argument(
         "--count",
         type=int,
         default=1,
@@ -40,4 +34,4 @@ def main() -> None:
     base_seed = args.seed if args.seed is not None else time.time_ns()
 
     for i in range(args.count):
-        print(generate(online=args.online, seed=base_seed + i))
+        print(generate(seed=base_seed + i))

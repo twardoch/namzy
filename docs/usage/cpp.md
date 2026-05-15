@@ -6,7 +6,7 @@ nav_order: 4
 
 # C++ / Qt 5
 
-The C++ implementation lives in `namzy-cpp`. It is a Qt 5 project that links against Qt Core and Qt Network.
+The C++ implementation lives in `namzy-cpp`. It is a Qt 5 project that links against Qt Core.
 
 ## Build
 
@@ -40,19 +40,12 @@ With a deterministic seed:
 namzy-cpp/build/namzy --count 5 --seed 42
 ```
 
-With online source words:
-
-```bash
-namzy-cpp/build/namzy --online --count 5
-```
-
 CLI flags:
 
 | Flag | Description |
 | --- | --- |
 | `--count N` | Print `N` names. Defaults to `1`. |
 | `--seed N` | Seed the generator. |
-| `--online` | Try online source words before falling back to bundled wordlists. |
 
 ## Use from Qt 5 code
 
@@ -63,16 +56,15 @@ Include `namzy.h` and link the implementation files into your Qt target.
 
 Namzy generator(42);
 
-QString offline = generator.generateOffline();
-QString online = generator.generateOnline();
+QString name = generator.generate();
 ```
 
-`generateOffline()` uses the shared 300 x 300 bundled wordlists. `generateOnline()` uses `QNetworkAccessManager` to request source words from the public random-word API, then falls back to offline generation if the request fails or times out.
+`generate()` picks one geographic word and one common word from the shared bundled lists, then randomly joins either geographic+common or common+geographic. That gives 180,000 raw ordered source pairings before cleanup and mangling.
 
 ## CMake embedding example
 
 ```cmake
-find_package(Qt5 COMPONENTS Core Network REQUIRED)
+find_package(Qt5 COMPONENTS Core REQUIRED)
 
 add_executable(my_app
   main.cpp
@@ -82,5 +74,5 @@ add_executable(my_app
 )
 
 target_include_directories(my_app PRIVATE ../namzy-cpp/src)
-target_link_libraries(my_app PRIVATE Qt5::Core Qt5::Network)
+target_link_libraries(my_app PRIVATE Qt5::Core)
 ```

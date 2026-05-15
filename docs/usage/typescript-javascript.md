@@ -27,23 +27,18 @@ console.log(name);
 
 ## Options
 
-Use `seed` for repeatable offline generation:
+Use `seed` for repeatable generation:
 
 ```js
 const name = await generate({ seed: 42 });
 ```
 
-Use `online: true` to request source words from the public random-word API. If the request fails, Namzy falls back to the shared 300 x 300 bundled wordlists.
-
-```js
-const name = await generate({ online: true });
-```
+Namzy picks one geographic word and one common word from the shared bundled lists, then randomly joins either geographic+common or common+geographic. That gives 180,000 raw ordered source pairings before cleanup and mangling.
 
 Available options:
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `online` | `boolean` | `false` | Fetch source words online, then fall back to the shared bundled wordlists if needed. |
 | `seed` | `number` | current timestamp | Seed the offline pseudo-random generator. |
 
 The package also exports `joinClean`, `mangle`, `mulberry32`, `GEO`, and `COMMON` for lower-level use.
@@ -56,16 +51,9 @@ Run without installing globally:
 npx @twardoch/namzy --count 5
 ```
 
-Use online source words:
-
-```bash
-npx @twardoch/namzy --online --count 5
-```
-
 CLI flags:
 
 | Flag | Description |
 | --- | --- |
 | `--count <N>` | Print `N` names. Defaults to `1`. |
-| `--online` | Try online source words before falling back to bundled wordlists. |
 | `--help`, `-h` | Show help. |

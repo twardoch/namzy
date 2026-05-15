@@ -1,6 +1,6 @@
 # namzy
 
-Generate fun, human-friendly project names — seeded by time, mangled for personality.
+Generate fun, human-friendly fused project names from a bundled local wordlist.
 
 ## Install
 
@@ -13,22 +13,13 @@ uvx namzy
 ## CLI usage
 
 ```bash
-# One name, single word (default)
 namzy
 
 # Multiple names
 namzy --count 5
 
-# Output shapes
-namzy --shape single    # e.g. Tokyuriver
-namzy --shape joined    # e.g. TokyuRiver
-namzy --shape spaced    # e.g. Tokyu River
-
 # Reproducible output
 namzy --seed 42 --count 3
-
-# Fetch words from a public API (falls back to offline on error)
-namzy --online --count 3
 ```
 
 ## Library usage
@@ -36,30 +27,19 @@ namzy --online --count 3
 ```python
 from namzy import generate
 
-# Single word (default)
 name = generate()
-
-# Joined PascalCase
-name = generate(shape="joined")
-
-# Spaced words
-name = generate(shape="spaced")
 
 # Reproducible
 name = generate(seed=42)
-
-# Online mode
-name = generate(online=True)
 ```
 
-## Modes
+## Wordlist
 
-- **Offline** (default): uses the shared bundled wordlists of 300 geographic names and 300 common words (90,000 raw pairings). No network required.
-- **Online**: Fetches two words from `random-word-api.herokuapp.com`. Falls back silently to offline on any error.
+Namzy uses the shared bundled wordlists of 300 geographic names and 300 common words. Each pair may be joined in either order, for 180,000 raw ordered pairings before seam cleanup and mangling. No network required.
 
 ## Mangling
 
-Names pass through a phonetic mangling pass: `tion→shun`, `ight→ite`, `oo→u`, `ck→kk`, `ph→f`, `ks→x`, trailing `s→z`. One or two substitutions apply randomly per word.
+Names pass through seam cleanup and the consonant rotation `c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u`.
 
 ## License
 

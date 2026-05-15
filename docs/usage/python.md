@@ -27,22 +27,18 @@ print(name)
 
 ## Options
 
-Use `seed` for repeatable offline generation:
+Use `seed` for repeatable generation:
 
 ```python
 print(generate(seed=42))
 ```
 
-Use `online=True` to request source words from the public random-word API. If the request fails, Namzy falls back to the shared 300 x 300 bundled wordlists.
-
-```python
-print(generate(online=True))
-```
+Namzy picks one geographic word and one common word from the shared bundled lists, then randomly joins either geographic+common or common+geographic. That gives 180,000 raw ordered source pairings before cleanup and mangling.
 
 Function signature:
 
 ```python
-generate(online: bool = False, seed: int | None = None) -> str
+generate(seed: int | None = None) -> str
 ```
 
 ## CLI
@@ -59,12 +55,6 @@ With a deterministic seed:
 namzy --count 5 --seed 42
 ```
 
-With online source words:
-
-```bash
-namzy --online --count 5
-```
-
 You can also run the package without installing it into the current environment:
 
 ```bash
@@ -77,4 +67,3 @@ CLI flags:
 | --- | --- |
 | `--count N` | Print `N` names. Defaults to `1`. |
 | `--seed INT` | Seed the generator. For multiple names, each item increments the seed. |
-| `--online` | Try online source words before falling back to bundled wordlists. |

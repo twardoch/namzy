@@ -29,7 +29,6 @@ use namzy::{generate, Options};
 
 fn main() {
     let name = generate(&Options {
-        online: false,
         seed: None,
     });
 
@@ -41,25 +40,15 @@ fn main() {
 
 ## Options
 
-Use a seed for repeatable offline generation:
+Use a seed for repeatable generation:
 
 ```rust
 let name = generate(&Options {
-    online: false,
     seed: Some(42),
 });
 ```
 
-Use online source words:
-
-```rust
-let name = generate(&Options {
-    online: true,
-    seed: None,
-});
-```
-
-If the online request fails, Namzy falls back to the shared 300 x 300 bundled wordlists.
+Namzy picks one geographic word and one common word from the shared bundled lists, then randomly joins either geographic+common or common+geographic. That gives 180,000 raw ordered source pairings before cleanup and mangling.
 
 The crate also exposes `join_clean()` and `Mulberry32` for lower-level use.
 
@@ -75,16 +64,9 @@ With a deterministic seed:
 namzy --count 5 --seed 42
 ```
 
-With online source words:
-
-```bash
-namzy --online --count 5
-```
-
 CLI flags:
 
 | Flag | Description |
 | --- | --- |
 | `--count <COUNT>` | Print the requested number of names. Defaults to `1`. |
 | `--seed <SEED>` | Seed the generator. For multiple names, each item increments the seed. |
-| `--online` | Try online source words before falling back to bundled wordlists. |

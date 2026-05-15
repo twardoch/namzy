@@ -1,8 +1,8 @@
 # namzy
 
-`namzy` generates fun, human-friendly project names for software or typefaces. It picks two words from a built-in (or online) vocabulary, fuses them at a clean junction so the result reads as a single word, and runs the seam through a small consonant rotation. The output looks invented but stays pronounceable — e.g. `Pariznimble`, `Luzacanlet`, `Boyzcraeft`.
+`namzy` generates fun, human-friendly project names for software or typefaces. It picks two words from a bundled vocabulary, fuses them at a clean junction so the result reads as a single word, and runs the seam through a small consonant rotation. The output looks invented but stays pronounceable — e.g. `Pariznimble`, `Luzacanlet`, `Boyzcraeft`.
 
-A live demo lives in [`docs/index.html`](./docs/index.html) (also browsable via GitHub Pages once enabled).
+A live demo lives in [`docs/index.md`](./docs/index.md) (also browsable via GitHub Pages once enabled).
 
 ## Repository layout
 
@@ -30,9 +30,7 @@ All four implementations behave the same way:
    `c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u`
 4. **Timestamp seed.** Seeded by `Date.now()` / `time_ns()` / system clock by default; a caller-supplied seed gives reproducible output.
 5. **Vocabulary.** Basic `A-Za-z` only, drawn from geographic names and common Latin-alphabet words. No diacritics.
-6. **Two modes.**
-   - *Bundled* — shared 300 geographic words x 300 common words (90,000 raw pairings) shipped with every implementation; no network.
-   - *Online* — fetches from a public no-auth API; falls back to bundled on failure.
+6. **Bundled vocabulary only.** Shared 300 geographic words x 300 common words, joined in either order, for 180,000 raw ordered pairings. No network.
 
 The four implementations are equivalent in spirit, not bit-identical. The TS implementation is the reference for the demo page.
 

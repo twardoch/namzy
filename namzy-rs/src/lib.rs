@@ -8,7 +8,6 @@ pub use mangle::Mulberry32;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct Options {
-    pub online: bool,
     pub seed: Option<u64>,
 }
 
@@ -59,41 +58,18 @@ pub fn join_clean(a: &str, b: &str) -> String {
     out
 }
 
-fn fetch_online() -> Option<Vec<String>> {
-    use std::time::Duration;
-    let resp = ureq::get("https://random-word-api.herokuapp.com/word?number=2&length=6")
-        .timeout(Duration::from_secs(3))
-        .call()
-        .ok()?;
-    let words: Vec<String> = resp.into_json().ok()?;
-    if words.len() >= 2 {
-        Some(words)
-    } else {
-        None
-    }
-}
-
 pub fn generate(opts: &Options) -> String {
     let seed = opts.seed.unwrap_or_else(default_seed);
     let mut rng = Mulberry32::new(seed);
 
-    let (w1, w2) = if opts.online {
-        match fetch_online() {
-            Some(words) => (words[0].clone(), words[1].clone()),
-            None => (
-                pick_word(wordlist::GEO, &mut rng),
-                pick_word(wordlist::COMMON, &mut rng),
-            ),
-        }
+    let geo = pick_word(wordlist::GEO, &mut rng).to_lowercase();
+    let common = pick_word(wordlist::COMMON, &mut rng).to_lowercase();
+    let (a, b) = if rng.range(2) == 0 {
+        (geo, common)
     } else {
-        (
-            pick_word(wordlist::GEO, &mut rng),
-            pick_word(wordlist::COMMON, &mut rng),
-        )
+        (common, geo)
     };
 
-    let a = w1.to_lowercase();
-    let b = w2.to_lowercase();
     let fused = join_clean(&a, &b);
     let rotated = mangle::mangle(&fused);
     capitalize(&rotated)

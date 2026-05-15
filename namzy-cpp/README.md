@@ -4,7 +4,7 @@ A C++/Qt5 CLI tool that generates fun, human-friendly project names.
 
 ## Dependencies
 
-- Qt 5.15+ (Core and Network modules)
+- Qt 5.15+ (Core module)
 - CMake 3.16+
 - A C++17-capable compiler
 
@@ -27,11 +27,8 @@ cmake -S . -B build && cmake --build build
 ## Usage
 
 ```sh
-./build/namzy                          # single word (offline, default)
-./build/namzy --shape joined           # TwoWordPascal
-./build/namzy --shape spaced           # Two Word
-./build/namzy --shape spaced --count 5 # five spaced names
-./build/namzy --online                 # fetch words from public API
+./build/namzy                          # one fused name
+./build/namzy --count 5                # five names
 ./build/namzy --seed 12345             # reproducible output
 ```
 
@@ -39,13 +36,10 @@ cmake -S . -B build && cmake --build build
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--shape single\|joined\|spaced` | `single` | Output format |
-| `--online` | off | Fetch words from random-word-api |
 | `--count N` | `1` | Number of names to generate |
 | `--seed N` | timestamp | RNG seed for reproducibility |
 
 ## Notes
 
-- Offline mode uses the shared bundled wordlists (300 geographic + 300 common words, 90,000 raw pairings).
-- Online mode hits `https://random-word-api.herokuapp.com/word?number=2&length=6` with a 3-second timeout and falls back to offline on failure.
-- A light phonetic mangling pass is applied (e.g. `Boys→Boyz`, `ks→x`, `ph→f`).
+- Namzy uses the shared bundled wordlists of 300 geographic names and 300 common words. Each pair may be joined in either order, for 180,000 raw ordered pairings before seam cleanup and mangling.
+- Seam cleanup and the consonant rotation `c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u` are applied to the fused name.

@@ -10,13 +10,12 @@ class Namzy
 public:
     explicit Namzy(quint64 seed = static_cast<quint64>(QDateTime::currentMSecsSinceEpoch()));
 
-    QString generateOffline();
-    QString generateOnline();
+    QString generate();
 
 private:
     QRandomGenerator m_rng;
 
     QString pickWord(const char* const* words, int count);
     static QString capitalize(const QString& s);
-    QString fuse(const QString& geo, const QString& common);
+    QString fuse(const QString& first, const QString& second);
 };

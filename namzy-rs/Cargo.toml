@@ -14,5 +14,4 @@ name = "namzy"
 path = "src/main.rs"
 
 [dependencies]
-ureq = { version = "2", features = ["json"] }
 clap = { version = "4", features = ["derive"] }
