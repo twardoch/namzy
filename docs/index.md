@@ -13,13 +13,7 @@ has_toc: false
 </section>
 
 <section class="namzy-demo" aria-labelledby="demo-title">
-  <div class="namzy-demo__head">
-    <div>
-      <p class="namzy-demo__eyebrow">Generator</p>
-      <h2 id="demo-title">Make a short list</h2>
-    </div>
-    <button id="go" type="button">Generate</button>
-  </div>
+  <h2 id="demo-title">Make a short list</h2>
   <fieldset>
     <div class="namzy-demo__controls">
       <label class="namzy-demo__field">
@@ -32,6 +26,7 @@ has_toc: false
       </label>
     </div>
   </fieldset>
+  <button id="go" type="button">Generate</button>
   <label class="namzy-demo__output">
     <span>Names</span>
     <textarea id="out" rows="8" readonly spellcheck="false" aria-live="polite"></textarea>
@@ -41,80 +36,16 @@ has_toc: false
 
 <p class="namzy-note">Mangling rotates <code>c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u</code>. Junction cleanup drops a duplicate letter or a vowel-on-vowel clash at the seam.</p>
 
-## Install
+## Usage
 
-```bash
-npm install @twardoch/namzy
-python -m pip install namzy
-cargo add namzy
-```
+Choose the page for the language you use:
 
-For C++ / Qt 5, build the source package:
+- [TypeScript / JavaScript]({{ '/usage/typescript-javascript/' | relative_url }})
+- [Python]({{ '/usage/python/' | relative_url }})
+- [Rust]({{ '/usage/rust/' | relative_url }})
+- [C++ / Qt 5]({{ '/usage/cpp/' | relative_url }})
 
-```bash
-cmake -S namzy-cpp -B namzy-cpp/build
-cmake --build namzy-cpp/build
-```
-
-## Use
-
-### TypeScript / JavaScript
-
-```js
-import { generate } from "@twardoch/namzy";
-
-console.log(await generate({ seed: 42 }));
-```
-
-CLI:
-
-```bash
-npx @twardoch/namzy --count 5
-```
-
-### Python
-
-```python
-from namzy import generate
-
-print(generate(seed=42))
-```
-
-CLI:
-
-```bash
-namzy --count 5 --seed 42
-```
-
-### Rust
-
-```rust
-use namzy::{generate, Options};
-
-fn main() {
-    let name = generate(&Options { online: false, seed: Some(42) });
-    println!("{name}");
-}
-```
-
-CLI:
-
-```bash
-cargo install namzy
-namzy --count 5 --seed 42
-```
-
-### C++ / Qt 5
-
-```cpp
-#include "namzy.h"
-
-Namzy generator(42);
-QString offline = generator.generateOffline();
-QString online = generator.generateOnline();
-```
-
-Link against Qt 5 Core and Network.
+All implementations return one fused name token. Offline mode uses bundled wordlists. Online mode asks a public random-word API for source words and falls back to bundled wordlists if the request fails.
 
 <script src="{{ '/namzy.js' | relative_url }}"></script>
 <script>

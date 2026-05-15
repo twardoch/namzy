@@ -11,14 +11,11 @@
 }
 
 .namzy-demo {
-  background:
-    radial-gradient(circle at 12% 0%, rgba(42, 102, 255, 0.1), transparent 34%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 249, 252, 0.92));
+  background: #fff;
   border: 1px solid rgba(40, 43, 52, 0.12);
-  border-radius: 1.4rem;
-  box-shadow: 0 1.25rem 3.5rem rgba(31, 35, 48, 0.09);
+  border-radius: 0.75rem;
   margin: 2rem 0;
-  padding: clamp(1.1rem, 2.5vw, 2rem);
+  padding: 1.25rem;
 }
 
 .namzy-demo fieldset {
@@ -27,47 +24,22 @@
   padding: 0;
 }
 
-.namzy-demo__head {
-  align-items: start;
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-  margin-bottom: 1.1rem;
-}
-
-.namzy-demo__head h2 {
-  font-size: clamp(1.7rem, 4vw, 2.55rem);
-  letter-spacing: -0.045em;
-  line-height: 1;
-  margin: 0;
-}
-
-.namzy-demo__eyebrow {
-  color: var(--text-muted-color, #6c757d);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  margin: 0 0 0.45rem;
-  text-transform: uppercase;
+.namzy-demo h2 {
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
 }
 
 .namzy-demo__controls {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  display: grid;
+  gap: 0.8rem;
   margin-bottom: 1rem;
 }
 
 .namzy-demo__field {
-  align-items: center;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(40, 43, 52, 0.12);
-  border-radius: 999px;
-  display: flex;
-  gap: 0.65rem;
+  display: grid;
+  gap: 0.35rem;
   margin: 0;
-  padding: 0.35rem 0.45rem 0.35rem 0.8rem;
 }
 
 .namzy-demo__field span,
@@ -82,22 +54,17 @@
 .namzy-demo input[type="number"] {
   background: #fff;
   border: 1px solid rgba(40, 43, 52, 0.16);
-  border-radius: 999px;
+  border-radius: 0.4rem;
   font: 700 1rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  max-width: 5.25rem;
-  padding: 0.55rem 0.7rem;
+  padding: 0.55rem 0.65rem;
+  width: 6rem;
 }
 
 .namzy-demo__check {
   align-items: center;
-  background: rgba(255, 255, 255, 0.58);
-  border: 1px solid rgba(40, 43, 52, 0.1);
-  border-radius: 999px;
   display: flex;
   gap: 0.55rem;
   margin: 0;
-  min-height: 2.55rem;
-  padding: 0 0.85rem;
 }
 
 .namzy-demo__check input {
@@ -109,19 +76,18 @@
 .namzy-demo button {
   background: var(--link-color, #2a66ff);
   border: 0;
-  border-radius: 999px;
-  box-shadow: 0 0.65rem 1.5rem rgba(42, 102, 255, 0.24);
+  border-radius: 0.5rem;
   color: #fff;
   cursor: pointer;
   font: inherit;
   font-weight: 700;
-  padding: 0.78rem 1.15rem;
-  transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+  margin: 0 0 1rem;
+  padding: 0.7rem 1rem;
+  transition: opacity 150ms ease;
 }
 
 .namzy-demo button:hover {
-  box-shadow: 0 0.85rem 1.8rem rgba(42, 102, 255, 0.3);
-  transform: translateY(-1px);
+  opacity: 0.9;
 }
 
 .namzy-demo button:disabled {
@@ -139,12 +105,11 @@
 .namzy-demo__output textarea {
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(40, 43, 52, 0.14);
-  border-radius: 1rem;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-radius: 0.5rem;
   color: #24262f;
   font: 1.1rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  min-height: 12rem;
-  padding: 1rem;
+  min-height: 10rem;
+  padding: 0.75rem;
   resize: vertical;
   width: 100%;
 }
@@ -153,26 +118,4 @@
   color: var(--text-muted-color, #6c757d);
   font-size: 0.9rem;
   margin: 1rem 0 0;
-}
-
-.namzy-card-grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  margin: 1.5rem 0 2rem;
-}
-
-.namzy-card {
-  border: 1px solid var(--main-border-color, rgba(127, 127, 127, 0.2));
-  border-radius: 0.85rem;
-  padding: 1rem;
-}
-
-.namzy-card h3 {
-  margin-top: 0;
-}
-
-.namzy-card p {
-  color: var(--text-muted-color, #6c757d);
-  margin-bottom: 0;
 }

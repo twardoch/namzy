@@ -37,6 +37,11 @@ defaults:
       path: ""
     values:
       layout: page
+  - scope:
+      path: "usage"
+    values:
+      layout: page
+      parent: Usage
 
 exclude:
   - Gemfile
