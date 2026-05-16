@@ -60,7 +60,7 @@ Namzy generator(42);
 QString name = generator.generate();
 ```
 
-`generate()` picks one geographic word and one common word from the shared bundled lists, then randomly joins either geographic+common or common+geographic. That gives 180,000 raw ordered source pairings before cleanup and mangling.
+`generate()` picks one geographic word and one common word from the shared bundled lists, then randomly joins either geographic+common or common+geographic. That gives 500,000 raw ordered source pairings before seam cleanup and replacement collisions.
 
 ## CMake embedding example
 

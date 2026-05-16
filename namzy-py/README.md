@@ -35,11 +35,11 @@ name = generate(seed=42)
 
 ## Wordlist
 
-Namzy uses the shared bundled wordlists of 300 geographic names and 300 common words. Each pair may be joined in either order, for 180,000 raw ordered pairings before seam cleanup and mangling. No network required.
+Namzy uses the shared bundled wordlists of 500 geographic names and 500 common words. Each pair may be joined in either order, for 500,000 raw ordered pairings before seam cleanup and replacement collisions. No network required.
 
 ## Mangling
 
-Names pass through seam cleanup and the consonant rotation `c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u`.
+Names pass through seam cleanup, then activate a seed-derived subset of 1 to 10 replacement rules from `c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u · b→p · p→b`.
 
 ## License
 

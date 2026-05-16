@@ -17,5 +17,5 @@ private:
 
     QString pickWord(const char* const* words, int count);
     static QString capitalize(const QString& s);
-    QString fuse(const QString& first, const QString& second);
+    QString fuse(const QString& first, const QString& second, quint16 activeMask);
 };

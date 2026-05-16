@@ -6,7 +6,7 @@ from __future__ import annotations
 import random
 import time
 
-from ._mangle import join_clean, mangle
+from ._mangle import active_rotation_rules, join_clean, mangle
 from ._wordlist import COMMON, GEO
 
 try:
@@ -37,5 +37,5 @@ def generate(seed: int | None = None) -> str:
 
     a, b = _pick_words(rng)
     fused = join_clean(a, b)
-    rotated = mangle(fused)
+    rotated = mangle(fused, active_rotation_rules(rng))
     return rotated[:1].upper() + rotated[1:]

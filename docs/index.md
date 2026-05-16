@@ -29,7 +29,7 @@ has_toc: false
   </label>
 </section>
 
-<p class="namzy-note">Mangling rotates <code>c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u</code>. Junction cleanup drops a duplicate letter or a vowel-on-vowel clash at the seam.</p>
+<p class="namzy-note">Mangling rotates <code>c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u · b→p · p→b</code>. Junction cleanup drops a duplicate letter or a vowel-on-vowel clash at the seam.</p>
 
 ## Usage
 
@@ -40,7 +40,7 @@ Choose the page for the language you use:
 - [Rust]({{ '/usage/rust/' | relative_url }})
 - [C++]({{ '/usage/cpp/' | relative_url }})
 
-All implementations return one fused name token. Namzy uses the same bundled 300 geographic words and 300 common words across every implementation, and can join them in either order. That makes 180,000 raw ordered source-word pairings before seam cleanup and consonant rotation.
+All implementations return one fused name token. Namzy uses the same bundled 500 geographic words and 500 common words across every implementation, and can join them in either order. That makes 500,000 raw ordered source-word pairings before seam cleanup and seed-selected consonant rotation. Each generated name activates a seed-derived subset of 1 to 10 replacement rules, so some names use only a few swaps while others can use the full map.
 
 <script src="{{ '/namzy.js' | relative_url }}"></script>
 <script>

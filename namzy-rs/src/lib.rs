@@ -3,7 +3,7 @@
 mod mangle;
 mod wordlist;
 
-pub use mangle::Mulberry32;
+pub use mangle::{mangle, Mulberry32};
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -71,6 +71,6 @@ pub fn generate(opts: &Options) -> String {
     };
 
     let fused = join_clean(&a, &b);
-    let rotated = mangle::mangle(&fused);
+    let rotated = mangle::mangle_with_mask(&fused, mangle::active_rotation_mask(&mut rng));
     capitalize(&rotated)
 }

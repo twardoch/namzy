@@ -1,31 +1,50 @@
 // this_file: namzy-cpp/src/mangle.cpp
 #include "mangle.h"
 
-static QChar rotateConsonant(QChar ch)
+struct RotationRule
+{
+    ushort from;
+    ushort to;
+};
+
+static const RotationRule ROTATION_RULES[] = {
+    { 'c', 'q' },
+    { 'f', 'v' },
+    { 'k', 'c' },
+    { 'q', 'k' },
+    { 's', 'z' },
+    { 'z', 's' },
+    { 'v', 'f' },
+    { 'w', 'u' },
+    { 'b', 'p' },
+    { 'p', 'b' },
+};
+
+quint16 allRotationRules()
+{
+    return static_cast<quint16>((1U << (sizeof(ROTATION_RULES) / sizeof(ROTATION_RULES[0]))) - 1U);
+}
+
+static QChar rotateConsonant(QChar ch, quint16 activeMask)
 {
     const bool upper = ch.isUpper();
     const QChar lo = ch.toLower();
-    QChar out = lo;
-    switch (lo.unicode()) {
-    case 'c': out = QChar('q'); break;
-    case 'f': out = QChar('v'); break;
-    case 'k': out = QChar('c'); break;
-    case 'q': out = QChar('k'); break;
-    case 's': out = QChar('z'); break;
-    case 'z': out = QChar('s'); break;
-    case 'v': out = QChar('f'); break;
-    case 'w': out = QChar('u'); break;
-    default: return ch;
+    const ushort code = lo.unicode();
+    for (int i = 0; i < static_cast<int>(sizeof(ROTATION_RULES) / sizeof(ROTATION_RULES[0])); ++i) {
+        if ((activeMask & (1U << i)) != 0 && code == ROTATION_RULES[i].from) {
+            const QChar out(ROTATION_RULES[i].to);
+            return upper ? out.toUpper() : out;
+        }
     }
-    return upper ? out.toUpper() : out;
+    return ch;
 }
 
-QString mangle(const QString& word)
+QString mangle(const QString& word, quint16 activeMask)
 {
     QString result;
     result.reserve(word.size());
     for (const QChar& c : word) {
-        result.append(rotateConsonant(c));
+        result.append(rotateConsonant(c, activeMask));
     }
     return result;
 }

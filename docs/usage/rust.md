@@ -49,7 +49,7 @@ let name = generate(&Options {
 });
 ```
 
-Namzy picks one geographic word and one common word from the shared bundled lists, then randomly joins either geographic+common or common+geographic. That gives 180,000 raw ordered source pairings before cleanup and mangling.
+Namzy picks one geographic word and one common word from the shared bundled lists, then randomly joins either geographic+common or common+geographic. That gives 500,000 raw ordered source pairings before seam cleanup and replacement collisions.
 
 The crate also exposes `join_clean()` and `Mulberry32` for lower-level use.
 

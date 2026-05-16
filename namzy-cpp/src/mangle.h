@@ -2,6 +2,8 @@
 #pragma once
 
 #include <QString>
+#include <QtGlobal>
 
-QString mangle(const QString& word);
+quint16 allRotationRules();
+QString mangle(const QString& word, quint16 activeMask = allRotationRules());
 QString joinClean(const QString& a, const QString& b);

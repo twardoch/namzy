@@ -1,6 +1,6 @@
 // this_file: src/index.ts
 
-import { joinClean, mangle, mulberry32 } from "./mangle.js";
+import { activeRotationMask, joinClean, mangle, mulberry32 } from "./mangle.js";
 import { COMMON, GEO } from "./wordlist.js";
 
 export interface NamzyOptions {
@@ -28,8 +28,8 @@ export async function generate(opts?: NamzyOptions): Promise<string> {
 	const [first, second] = rng() < 0.5 ? [w1, w2] : [w2, w1];
 
 	const fused = joinClean(first, second);
-	return capitalize(mangle(fused));
+	return capitalize(mangle(fused, activeRotationMask(rng)));
 }
 
 export { COMMON, GEO } from "./wordlist.js";
-export { joinClean, mangle, mulberry32 };
+export { activeRotationMask, joinClean, mangle, mulberry32 };

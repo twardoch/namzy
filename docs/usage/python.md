@@ -34,7 +34,7 @@ Use `seed` for repeatable generation:
 print(generate(seed=42))
 ```
 
-Namzy picks one geographic word and one common word from the shared bundled lists, then randomly joins either geographic+common or common+geographic. That gives 180,000 raw ordered source pairings before cleanup and mangling.
+Namzy picks one geographic word and one common word from the shared bundled lists, then randomly joins either geographic+common or common+geographic. That gives 500,000 raw ordered source pairings before seam cleanup and replacement collisions.
 
 Function signature:
 

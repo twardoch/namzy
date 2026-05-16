@@ -26,28 +26,53 @@ impl Mulberry32 {
     }
 }
 
-fn rotate_char(c: char) -> char {
-    match c {
-        'c' => 'q',
-        'f' => 'v',
-        'k' => 'c',
-        'q' => 'k',
-        's' => 'z',
-        'z' => 's',
-        'v' => 'f',
-        'w' => 'u',
-        'C' => 'Q',
-        'F' => 'V',
-        'K' => 'C',
-        'Q' => 'K',
-        'S' => 'Z',
-        'Z' => 'S',
-        'V' => 'F',
-        'W' => 'U',
-        other => other,
+const ROTATION_RULES: [(char, char); 10] = [
+    ('c', 'q'),
+    ('f', 'v'),
+    ('k', 'c'),
+    ('q', 'k'),
+    ('s', 'z'),
+    ('z', 's'),
+    ('v', 'f'),
+    ('w', 'u'),
+    ('b', 'p'),
+    ('p', 'b'),
+];
+
+const ALL_ROTATIONS: u16 = (1 << ROTATION_RULES.len()) - 1;
+
+pub fn active_rotation_mask(rng: &mut Mulberry32) -> u16 {
+    let mut order = [0usize, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    let active_count = rng.range(ROTATION_RULES.len()) + 1;
+    for i in 0..active_count {
+        let swap = i + rng.range(order.len() - i);
+        order.swap(i, swap);
     }
+    let mut mask = 0u16;
+    for idx in order.iter().take(active_count) {
+        mask |= 1 << idx;
+    }
+    mask
+}
+
+fn rotate_char(c: char, active_mask: u16) -> char {
+    let lower = c.to_ascii_lowercase();
+    for (idx, (src, dst)) in ROTATION_RULES.iter().enumerate() {
+        if (active_mask & (1 << idx)) != 0 && lower == *src {
+            return if c.is_ascii_uppercase() {
+                dst.to_ascii_uppercase()
+            } else {
+                *dst
+            };
+        }
+    }
+    c
 }
 
 pub fn mangle(word: &str) -> String {
-    word.chars().map(rotate_char).collect()
+    mangle_with_mask(word, ALL_ROTATIONS)
+}
+
+pub fn mangle_with_mask(word: &str, active_mask: u16) -> String {
+    word.chars().map(|c| rotate_char(c, active_mask)).collect()
 }

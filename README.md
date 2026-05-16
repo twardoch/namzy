@@ -1,6 +1,6 @@
 # namzy
 
-`namzy` generates fun, human-friendly project names for software or typefaces. It picks two words from a bundled vocabulary, fuses them at a clean junction so the result reads as a single word, and runs the seam through a small consonant rotation. The output looks invented but stays pronounceable — e.g. `Pariznimble`, `Luzacanlet`, `Boyzcraeft`.
+`namzy` generates fun, human-friendly project names for software or typefaces. It picks two words from a bundled vocabulary, fuses them at a clean junction so the result reads as a single word, and runs the seam through a small consonant rotation. Each generated name activates a seed-derived subset of 1 to 10 replacement rules, so some names use only a few swaps while others can use the full map. The output looks invented but stays pronounceable — e.g. `Pariznimble`, `Luzacanlet`, `Boyzcraeft`.
 
 A live demo lives in [`docs/index.md`](./docs/index.md) (also browsable via GitHub Pages once enabled).
 
@@ -27,10 +27,10 @@ All four implementations behave the same way:
    - if both letters are vowels (`a e i o u y`), drop one.
    Applied up to twice. This removes awkward joins like `nordaarctic` → `nordarctic`.
 3. **Consonant rotation pass.** A small, case-preserving per-letter map applied to the fused string:
-   `c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u`
-4. **Timestamp seed.** Seeded by `Date.now()` / `time_ns()` / system clock by default; a caller-supplied seed gives reproducible output.
+   `c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u · b→p · p→b`
+4. **Timestamp seed.** Seeded by `Date.now()` / `time_ns()` / system clock by default; a caller-supplied seed gives reproducible output and selects which replacement rules are active.
 5. **Vocabulary.** Basic `A-Za-z` only, drawn from geographic names and common Latin-alphabet words. No diacritics.
-6. **Bundled vocabulary only.** Shared 300 geographic words x 300 common words, joined in either order, for 180,000 raw ordered pairings. No network.
+6. **Bundled vocabulary only.** Shared 500 geographic words x 500 common words, joined in either order, for 500,000 raw ordered pairings before seam cleanup and replacement collisions. No network.
 
 The four implementations are equivalent in spirit, not bit-identical. The TS implementation is the reference for the demo page.
 
