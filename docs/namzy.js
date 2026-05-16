@@ -89,7 +89,7 @@ var namzy = (() => {
   }
   var VOWELS = /* @__PURE__ */ new Set(["a", "e", "i", "o", "u", "y"]);
   function joinClean(a, b) {
-    let head = a;
+    const head = a;
     let tail = b;
     for (let i = 0; i < 2 && head.length > 0 && tail.length > 0; i++) {
       const last = head[head.length - 1].toLowerCase();
