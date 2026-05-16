@@ -2,7 +2,7 @@
 # Publish all namzy packages to their respective registries.
 # Usage: ./publish.sh [--dry-run]
 #
-# TS  → npm     (needs `npm login`)
+# TS  → npm     (needs `npm login` or NPM_TOKEN env)
 # Py  → PyPI    (needs PYPI_TOKEN env or `~/.pypirc`)
 # Rs  → crates  (needs `cargo login`)
 # C++ →         (not published — built only)
@@ -29,6 +29,23 @@ run() {
 }
 
 have() { command -v "$1" >/dev/null 2>&1; }
+
+configure_npm_token() {
+  [[ -n "${NPM_TOKEN:-}" ]] || return 0
+  NPM_CONFIG_USERCONFIG="$(mktemp)"
+  export NPM_CONFIG_USERCONFIG
+  chmod 600 "$NPM_CONFIG_USERCONFIG"
+  printf "//registry.npmjs.org/:_authToken=%s\n" "$NPM_TOKEN" > "$NPM_CONFIG_USERCONFIG"
+  trap 'rm -f "${NPM_CONFIG_USERCONFIG:-}"' EXIT
+}
+
+require_npm_auth() {
+  have npm || die "npm not found"
+  configure_npm_token
+  if ! npm whoami >/dev/null 2>&1; then
+    die "npm is not authenticated for https://registry.npmjs.org/. Run 'npm login' or set NPM_TOKEN to a publish-capable token, then rerun ./publish.sh."
+  fi
+}
 
 assert_clean_except_rust_version_files() {
   local status path
@@ -94,6 +111,10 @@ PY_PYPI
 crate_version_exists() {
   cargo search namzy --limit 1 2>/dev/null | grep -Eq '^namzy = "'"$VERSION"'"'
 }
+
+if [[ -z "$DRY" ]]; then
+  require_npm_auth
+fi
 
 say "Synchronizing package versions"
 VERSION_TAG="$(version_from_gitnextver)"
