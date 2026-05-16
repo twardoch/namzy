@@ -1,6 +1,6 @@
 {
   "name": "@twardoch/namzy",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "Generates fun fused human-friendly project names",
   "license": "MIT",
   "type": "module",
