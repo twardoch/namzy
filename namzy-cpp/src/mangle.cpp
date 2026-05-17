@@ -1,57 +1,65 @@
 // this_file: namzy-cpp/src/mangle.cpp
 #include "mangle.h"
 #include "wordlist.h"
-#include <QHash>
+#include <QVector>
 
-static QHash<QChar, QChar> buildRotationMap()
-{
-    QHash<QChar, QChar> m;
-    for (const auto& p : namzy::rotations()) {
-        m.insert(p.first, p.second);
+namespace {
+constexpr int kMaxLen = 12;
+constexpr int kMaxTries = 8;
+
+bool hasTripleLetter(const QString& s) {
+    for (int i = 2; i < s.size(); ++i) {
+        if (s.at(i) == s.at(i - 1) && s.at(i) == s.at(i - 2)) return true;
     }
-    return m;
+    return false;
 }
 
-static const QHash<QChar, QChar>& rotationMap()
-{
-    static const QHash<QChar, QChar> m = buildRotationMap();
-    return m;
-}
-
-static void rotateAt(QString& s, int pos)
-{
-    if (pos < 0 || pos >= s.size()) return;
-    const QChar ch = s.at(pos);
-    const bool upper = ch.isUpper();
-    const QChar lo = ch.toLower();
-    auto it = rotationMap().find(lo);
-    if (it == rotationMap().end()) return;
-    s[pos] = upper ? it.value().toUpper() : it.value();
-}
-
-QString applyRotations(const QString& compound, QRandomGenerator& rng)
-{
-    if (compound.isEmpty()) return compound;
-    QString out = compound;
-    const int passes = (rng.bounded(2) == 0) ? 1 : 2;
-    for (int i = 0; i < passes; ++i) {
-        const int pos = static_cast<int>(rng.bounded(static_cast<quint32>(out.size())));
-        rotateAt(out, pos);
+bool junctionUgly(const QString& compound, int junction) {
+    const int start = std::max(0, junction - 2);
+    const int end = std::min(compound.size(), junction + 2);
+    const QString win = compound.mid(start, end - start);
+    for (const QString& seam : namzy::badSeams()) {
+        if (win.contains(seam)) return true;
     }
-    return out;
+    return false;
 }
 
-static QString capitalize(const QString& s)
-{
+QString capitalize(const QString& s) {
     if (s.isEmpty()) return s;
     return QString(s.at(0).toUpper()) + s.mid(1);
 }
+} // namespace
 
-QString buildName(QRandomGenerator& rng)
-{
+QString applyRotation(const QString& s, QRandomGenerator& rng) {
+    struct Match { int i; QString src; QString dst; };
+    QVector<Match> matches;
+    const auto& rules = namzy::rotations();
+    for (int i = 0; i < s.size(); ++i) {
+        for (const auto& r : rules) {
+            const QString& src = r.first;
+            if (i + src.size() <= s.size() && s.mid(i, src.size()) == src) {
+                matches.append(Match{ i, src, r.second });
+            }
+        }
+    }
+    if (matches.isEmpty()) return s;
+    const Match& m = matches.at(static_cast<int>(rng.bounded(static_cast<quint32>(matches.size()))));
+    return s.left(m.i) + m.dst + s.mid(m.i + m.src.size());
+}
+
+QString buildName(QRandomGenerator& rng) {
     const QStringList& stems = namzy::stems();
     const int n = stems.size();
-    const QString a = stems.at(static_cast<int>(rng.bounded(static_cast<quint32>(n))));
-    const QString b = stems.at(static_cast<int>(rng.bounded(static_cast<quint32>(n))));
-    return capitalize(applyRotations(a + b, rng));
+    QString best;
+    for (int t = 0; t < kMaxTries; ++t) {
+        const QString a = stems.at(static_cast<int>(rng.bounded(static_cast<quint32>(n))));
+        const QString b = stems.at(static_cast<int>(rng.bounded(static_cast<quint32>(n))));
+        const QString compound = a + b;
+        if (compound.size() > kMaxLen || hasTripleLetter(compound) || junctionUgly(compound, a.size())) {
+            if (best.isEmpty()) best = compound;
+            continue;
+        }
+        return capitalize(applyRotation(compound, rng));
+    }
+    return capitalize(applyRotation(best, rng));
 }

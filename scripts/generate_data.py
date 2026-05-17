@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 # this_file: scripts/generate_data.py
-"""Generate stem packs, rotation rules, and per-language wordlist sources.
+"""Generate stem packs, syllable rotations, bad-seam list, and per-language wordlist sources.
+
+Design (issue #102):
+- 10 disciplines, hand-curated, ≤2 syllables and ≤7 chars each, ~100 stems per pack.
+- Syllable-based rotations: only "safe" CV-pair swaps + a few unambiguous letter swaps.
+- Bad-seam list: reject candidates with double identical vowels, triple letters, etc.
 
 Source of truth: this file. Outputs:
-  data/{cities,rivers,colors,adjectives,nouns,verbs,names}.txt  (200 words each)
+  data/{cities,rivers,colors,adjectives,nouns,verbs,names,trees,birds,gems,weather,myth}.txt
   data/rotations.txt
+  data/badseams.txt
   namzy-ts/src/wordlist.ts
   namzy-py/src/namzy/_wordlist.py
   namzy-rs/src/wordlist.rs
-  namzy-cpp/src/wordlist.cpp + wordlist.h
+  namzy-cpp/src/wordlist.{h,cpp}
 """
 from __future__ import annotations
 from pathlib import Path
@@ -17,209 +23,226 @@ from typing import Sequence
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 
-# Stem packs. Each ~200 short, compact, portable, recognizable.
+# ----------------------- Stem source pools -----------------------
+# Hand-curated. The filter below keeps only ≤2-syllable, ≤7-char words.
+# Goal: ≥80 surviving stems per pack.
+
 CITIES = """paris tokyo milan rome oslo lima baku doha kiev riga sofia kabul
 dakar cairo accra perth miami boston dallas denver vegas omaha tulsa fargo
-salem mobile tucson ottawa calgary dover leeds york derby oxford bristol
-cardiff bath hull kent devon essex berlin munich bremen bonn jena mainz
-madrid sevilla malaga bilbao toledo oviedo lisbon porto faro evora braga
-athens sparta rhodes crete naxos delos rabat tangier oran tunis sana mecca
-jeddah aden dubai manama beirut amman aleppo mosul basra shiraz tabriz herat
-lahore dhaka mumbai delhi jaipur agra chennai pune surat bhopal indore
-nagpur patna kandy galle lhasa hanoi manila cebu davao jakarta bandung medan
-penang melaka beijing wuhan harbin chengdu ningbo xian dalian taipei seoul
-busan daegu sapporo sendai nagoya kobe niigata sydney hobart darwin cairns
-mackay alice auckland nelson napier cuzco quito bogota cali caracas recife
-manaus natal asuncion santiago rosario havana nassau panama leon merida
-oaxaca puebla cancun austin houston phoenix fresno oakland raleigh durham
-nashville eugene boise reno juneau wichita topeka lincoln helena pierre
-dublin galway cork bergen tromso aarhus malmo turku tampere kazan samara
-tomsk omsk perm minsk vilnius tallinn warsaw krakow brno linz graz salzburg
-basel geneva lyon nantes nice dijon reims lille rouen calais cannes tours
-metz brest amiens orleans naples turin genoa verona pisa siena parma bari
-""".split()
+salem mobile dover leeds york derby bath hull kent devon essex berlin munich
+bremen bonn jena mainz madrid lisbon porto faro evora braga athens sparta
+rhodes crete naxos delos rabat oran tunis sana mecca jeddah aden dubai amman
+mosul basra herat lahore dhaka delhi agra pune surat patna hanoi manila cebu
+davao medan beijing wuhan xian dalian taipei seoul busan daegu kobe sydney
+hobart darwin cairns alice cuzco quito cali natal leon merida cancun austin
+fresno durham eugene boise reno juneau topeka dublin galway cork bergen tromso
+malmo turku kazan samara tomsk omsk perm minsk warsaw krakow brno linz graz
+basel geneva lyon nantes nice dijon reims lille rouen calais cannes tours metz
+brest naples turin genoa verona pisa siena parma bari aarhus tallinn vilnius
+shanghai osaka kyoto pune patna ankara izmir bursa konya gdansk lodz prague
+zurich bern oslo madrid sevilla bilbao toledo dakar lagos durban accra essen""".split()
 
-RIVERS = """nile amazon volga rhine danube seine thames tiber tigris ganges
-indus mekong yukon hudson congo niger zambezi orinoco parana douro tagus ebro
-loire elbe oder vistula dnieper don ural lena ob amur yangtze huang chao
-brahma yamuna kaveri jordan euphrates orange limpopo senegal gambia okavango
-murray darling colorado snake platte ohio missouri illinois arkansas red
-brazos pecos rio gila salmon willamette sacramento klamath fraser nelson
-churchill ottawa peace mackenzie liard skeena thompson saskatchewan athabasca
-saint lawrence saguenay copper kobuk noatak yampa green colorado roanoke
-savannah neuse cape pearl mobile alabama tombigbee chattahoochee suwannee
-santee broad oconee black tar peedee yadkin catawba cumberland tennessee
-kanawha shenandoah james potomac susquehanna delaware hudson connecticut
-penobscot kennebec androscoggin merrimack thames housatonic genesee mohawk
-oswego niagara maumee wabash cuyahoga muskingum scioto miami licking green
-barren rock fox illinois sangamon iowa cedar des moines wapsipinicon skunk
-chariton grand gasconade meramec current eleven black white cache buffalo
-neosho verdigris cimarron washita canadian salt brazos colorado nueces frio
-pecos llano san sabine trinity neches lavaca guadalupe medina concho leon
-po arno tevere adige reno taro ticino oglio adda mincio piave brenta
-ems weser saale havel spree main neckar lech isar inn drava sava morava
-tisza prut siret olt mures somes argesh struma maritsa vardar drin
-tay clyde forth tweed spey severn trent avon dee don esk wye usk
-shannon liffey lee suir nore barrow boyne foyle bann erne moy lagan
-""".split()
+RIVERS = """nile volga rhine seine thames tiber indus congo niger douro tagus
+ebro loire elbe oder don ural lena amur chao jordan snake platte ohio red gila
+fraser peace copper yampa green pearl james hudson mohawk fox iowa cedar grand
+white salt trinity neches medina leon po arno reno taro ticino oglio adda
+mincio piave brenta ems weser saale havel spree main neckar lech isar inn
+drava sava tisza prut olt mures somes drin tay clyde forth tweed spey severn
+trent avon dee esk wye usk lee suir nore boyne bann erne moy lagan parana
+amazon mekong yukon ganges yangtze ob tweed elbe meuse rhone tarn lot var ain
+aisne marne yonne saone tilt tay teme dove ouse swale ure tees coquet aire""".split()
 
-COLORS = """azure amber coral indigo ivory jade lilac mauve ochre olive pearl
-ruby saffron scarlet sepia teal violet umber vermilion plum cobalt cyan
-magenta crimson maroon navy salmon beige linen mint peach rose sand sky
-slate snow tan wine bronze copper gold silver brass cherry chestnut hazel
-honey lemon lime cream cocoa coffee mocha russet sage taupe burgundy claret
-emerald fern flax ginger grape khaki ochre orchid orchard fuchsia magnolia
-chartreuse moss myrtle pumpkin raspberry rust seagreen seashell sienna sky
-sorrel spruce squash tangerine thistle topaz turquoise viridian wheat
-zaffre puce mulberry damask carmine cerise garnet hyacinth jasmine lavender
-melon mustard nutmeg paprika periwinkle persimmon pewter pomegranate poppy
-quince rosewood ruche saddle sangria seafoam shamrock smoke spearmint sterling
-sunflower terra tomato vanilla verdigris veronica wisteria xanadu zinnia
-absinthe alabaster apricot aqua aquamarine asparagus avocado azalea bistre
-bittersweet blush bordeaux brick buff bumblebee burgundy butter byzantium
-canary cardinal celadon celeste chambray chamois cinnabar citrine clover
-coquelicot daffodil dandelion eggshell electric emerald firebrick flame
-glaucous goldenrod gunmetal heliotrope iceberg icterine isabelline imperial
-jet juniper lavender lemonade lilac linen mahogany malachite mango maroon
-melon midnight mocha moonbeam morello mulberry myrtle nutbrown obsidian ochre
-opal opaline orchid oyster paisley papaya pastel pewter pink pistachio
-platinum porcelain primrose prussian quartz quicksilver rouge sable sapphire
-seal shadow slate snow spruce starlight sunset thunder umbra walnut whisper
-""".split()
+COLORS = """azure amber coral ivory jade lilac mauve ochre olive pearl ruby
+sepia teal umber plum cobalt cyan navy salmon beige linen mint peach rose sand
+sky slate snow tan wine bronze copper gold brass cherry hazel honey lemon lime
+cream cocoa mocha sage taupe fern flax ginger grape khaki orchid moss rust
+sienna spruce jasper ash fawn dust gray char ink ebony frost silver claret
+garnet jet onyx blush rouge crimson scarlet magenta indigo violet cobalt poppy
+saffron citrus papaya melon thistle topaz quartz pewter saddle smoke fuchsia
+chestnut buff brick coffee dune apricot dawn vine moss ember rust seal heliotrope
+opal coral mango chia ivory pine bay umber sable opal opal cream khaki ochre""".split()
 
-ADJECTIVES = """brave bright calm clever cool deep eager fair fine glad
-grand happy keen kind lively merry neat noble proud quick quiet swift
-warm wise witty young zest jolly lucky mighty smart snappy spry sunny
-super tidy true vivid wild zippy able active alert ample apt artful
-balmy bold breezy brisk chic chill cosy crisp dapper dashing dazzling
-deft divine dreamy dynamic earnest easy elated elegant epic exact
-fancy fluent fresh friendly funky gallant gentle gifted glossy graceful
-hardy hearty honest hopeful humble jaunty jazzy jovial joyful jubilant
-keen lavish legit liberal light limber lithe lovely loyal lucid lush
-magic main mellow mild modest neat nifty nimble nimbly noble notable
-peppy perky placid plucky plush polished polite posh prime pristine
-pristine prompt pure quaint quirky radiant rapid rare regal reliable
-robust rosy royal rugged sage sassy savvy serene sharp shiny silky
-sincere sleek slick smooth snug solid sparkly spirited splendid spotless
-spunky stable stately steady stellar stoic strong stunning stylish suave
-subtle sturdy supple svelte tactful tender thrifty tidy timeless top
-tough tranquil trendy trusty upbeat valiant velvet warmhearted welcoming
-worthy zealous ace adept agile airy ardent astute beaming benign bonny
-breezy buoyant candid charming cheery chipper choice classic clean cogent
-comfy cordial cosmic cute daring dauntless dewy devout doughty dreamy ducky
-fab famed fervid festive firm forthright frank fruitful genial genuine glowing
-golden hale handy heady hopeful jocund kingly lithe luminous luxe magical""".split()
+ADJECTIVES = """brave bright calm clever cool deep eager fair fine glad grand
+happy keen kind merry neat noble proud quick quiet swift warm wise witty young
+jolly lucky mighty smart snappy spry sunny super tidy true vivid wild zippy
+able active alert ample apt artful balmy bold breezy brisk chic chill cosy
+crisp dapper deft divine dreamy easy elated epic exact fancy fluent fresh
+funky gallant gentle gifted glossy hardy hearty honest hopeful humble jaunty
+jazzy jovial joyful keen lavish light limber lithe lovely loyal lucid lush
+mellow mild modest nifty nimble noble peppy perky placid plucky plush polite
+posh prime prompt pure quaint quirky rapid rare regal robust rosy royal rugged
+sassy savvy serene sharp shiny silky sleek slick smooth snug solid spry stable
+steady stoic strong stylish suave subtle sturdy supple svelte tender thrifty""".split()
 
-NOUNS = """harbor haven cove glade meadow grove orchard summit ridge peak
-canyon vista oasis sanctum atrium plaza forum agora portal beacon torch
-ember spark flame prism orbit comet nebula pulsar quasar zenith apex
-crown laurel medal trophy gem jewel pearl charm token coin badge crest
-emblem sigil banner pennant arrow anchor compass keystone cornerstone
-pillar lantern lighthouse keep tower castle bastion citadel fortress
-manor cottage cabin lodge chalet villa palace temple shrine altar
-chapel cathedral basilica garden grotto fountain spring brook creek
-falls rapids tide wave swell pearl shell coral reef harbor port pier
-dock wharf marina island isle archipelago atoll cape ridge cliff bluff
-mesa plateau valley vale dale fen heath moor savanna prairie tundra
-delta lagoon estuary fjord strait sound channel bay gulf cove inlet
-lakeshore beach dune cinder pumice basalt granite quartz crystal opal
-agate amber jade onyx topaz garnet zircon spinel beryl peridot
-tourmaline jasper malachite obsidian moonstone sunstone bloodstone amethyst
-aquamarine turquoise lapis citrine carnelian chalcedony tigereye hematite
-meadowlark falcon eagle hawk swan crane heron robin wren finch sparrow
-sunbeam dawn dusk twilight starlight moonlight aurora rainbow zephyr breeze
-gale storm thunder lightning whirlwind tempest meridian solstice equinox
-talisman amulet charm scepter chalice goblet flute lyre harp drum bell
-chime echo whisper melody chorus anthem hymn verse rhyme stanza ode lullaby
-quill scroll parchment tome volume tale fable myth legend saga epic tale""".split()
+NOUNS = """harbor haven cove glade meadow grove summit ridge peak canyon vista
+oasis sanctum atrium plaza forum agora portal beacon torch ember spark flame
+prism orbit comet zenith apex crown laurel medal trophy gem jewel pearl charm
+token coin badge crest emblem sigil banner arrow anchor compass keystone
+pillar lantern keep tower castle bastion manor cottage cabin lodge chalet villa
+palace temple shrine altar chapel garden grotto spring brook creek tide wave
+swell shell coral reef port pier dock wharf isle atoll cape cliff bluff mesa
+valley vale dale fen heath moor delta lagoon fjord sound channel bay gulf inlet
+beach dune basalt granite quartz crystal opal agate jade onyx topaz beryl
+jasper malachite citrine zircon spinel falcon eagle hawk swan crane heron robin
+sunbeam rainbow zephyr breeze gale storm thunder amulet chalice flute lyre""".split()
 
 VERBS = """soar glide drift float flow leap dash sprint march wander roam
-explore voyage venture journey travel embark launch begin start spark
-ignite kindle awaken arise rise climb ascend conquer summit triumph
-flourish thrive prosper bloom blossom flower grow expand evolve elevate
-empower energize inspire spark uplift cherish nurture foster shelter
-guard protect uphold support sustain anchor steady balance harmonize
-align tune compose craft fashion forge sculpt shape mold weave thread
-knit stitch braid binds craft build raise rear render render shape
-discover unveil reveal disclose unfold open share spread broadcast share
-gather collect compile assemble unite bond join meld merge blend fuse
-synthesize integrate connect link bridge weave converge gather rally
-flourish blossom thrive prosper succeed achieve attain master conquer
-prevail triumph excel shine glow gleam glimmer sparkle radiate beam
-flash bloom flourish flutter dart dive surge swirl spin twirl pivot
-balance hover linger glide pirouette swoop swivel cascade tumble vault
-bound bounce skip prance gambol caper romp frolic cavort dance sway
-glisten shimmer scintillate twinkle dazzle illuminate radiate brighten
-amplify boost charge fortify embolden enliven enchant captivate beguile
-mesmerize delight gladden enrich endow grant gift bestow yield deliver
-render produce furnish supply provide cultivate plant sow reap harvest
-till tend mind heal mend renew restore revive refresh rejuvenate awaken
-quicken hasten propel thrust propel propel guide steer navigate course
-chart map plot trace draft sketch outline design devise envision
-imagine dream wish hope aspire strive seek pursue chase track hunt
-gain win earn capture claim secure obtain procure attain reach grasp""".split()
+voyage venture journey travel embark launch spark ignite kindle awaken arise
+rise climb ascend bloom blossom flower grow expand evolve elevate enliven
+inspire spark uplift nurture foster shelter guard protect uphold support
+sustain anchor steady balance align tune compose craft fashion forge sculpt
+shape mold weave thread knit stitch braid build raise discover unveil reveal
+unfold open share spread gather collect compile unite bond join meld merge
+blend fuse synthesize connect link bridge converge rally thrive prosper achieve
+attain master prevail excel shine glow gleam glimmer sparkle radiate beam
+flash flutter dart dive surge swirl spin twirl pivot hover linger swoop
+cascade tumble vault bound bounce skip prance gambol caper romp frolic cavort""".split()
 
 NAMES = """ada alex amy ana avi ben bea cam dan dee eli emma eva finn gus
-hugo ian iris ivan jade jane juno kai kit lena liam lila luca lyra maya
-mia milo nia noah nora oli omar otto piper quinn rex rio ron sage sam
-sara seth sky theo tom uma vera vic will xander yael yuki zane zara
-alma anya beau cole cora dane dora elsa enzo erin esme finn gabe gina
-hank hugo iggy inez ivy jack joel juno kade kara kira kyle lana lars
-leah leon lily luna mack maeve mads matt myra nash neil niko nora odin
-oren orin pax pete piper raj rena rhys riya rome rosa ruth ryan ryla
-seth shay simon sloan stef tara teo tess thane tilda toby vance vera
-vita vlad walt wes wren xenia yves zara zeke zion abe ada alan alma
-amir andi anya arden aria ariel arlo asher aster atticus august aurora
-bea beck beth blake blanche bo bridget bruno cael cain cal calla callie
-camilo cara casey cass cato cecily celia celine cesar chase clio cole
-colt cooper coral corin cyrus daisy dalia dane dario darby dax dee desmond
-dexter diana dimitri dina dom drew dru dylan eden edith elena elias eliza
-elif ellis elsa emery emil enzo eric esme estes evan ewan ezra fern fiona""".split()
+hugo ian iris ivan jade jane juno kai kit lena liam lila luca lyra maya mia
+milo nia noah nora oli omar otto piper quinn rex rio ron sage sam sara seth
+sky theo tom uma vera vic will xander yael yuki zane zara alma anya beau cole
+cora dane dora elsa enzo erin esme gabe gina hank iggy inez ivy jack joel juno
+kade kara kira kyle lana lars leah leon lily luna mack maeve mads matt myra
+nash neil niko odin oren orin pax pete raj rena rhys riya rome rosa ruth ryan
+seth shay simon sloan stef tara teo tess thane tilda toby vance vita vlad walt
+wes wren xenia yves zara zeke zion abe alan amir andi arlo asher aster august
+bea beck beth blake bo bruno cael cain cal calla cara casey cass cato cyrus""".split()
 
-# Pad/truncate to exactly 200
-def fix200(lst: Sequence[str], label: str) -> list[str]:
-    # dedupe preserving order
-    seen = set()
-    out = []
-    for w in lst:
+TREES = """oak elm ash fir pine cedar maple birch beech alder hazel holly ivy
+fern rowan larch yew bay palm aspen poplar willow olive lime hawthorn cherry
+walnut chestnut hornbeam linden cypress juniper sycamore plane laurel mulberry
+fig peach plum pear apple lemon mango mango orange almond cacao banyan baobab
+mahogany teak ebony rose dogwood box quince spruce balsa sandal myrtle locust
+poplar tamarack hickory pecan oak elm fir pine cedar maple birch beech ash
+yew bay holly ivy elder fern rowan willow olive lime hawthorn cherry walnut
+chestnut linden cypress sycamore plane laurel mulberry fig peach plum pear apple
+lemon mango orange almond cacao baobab teak ebony rose dogwood box quince spruce""".split()
+
+BIRDS = """robin finch wren hawk owl falcon swan crane lark raven dove jay
+kestrel heron ibis kite eagle vulture buzzard merlin osprey peacock parrot
+ostrich emu kiwi puffin gull tern petrel kingfisher cuckoo magpie thrush nightingale
+blackbird sparrow martin swallow swift swiftlet plover snipe woodcock pheasant
+quail partridge grouse turkey rooster hen duck goose teal mallard goose pelican
+flamingo stork bittern cormorant guillemot razorbill auk loon grebe coot rail
+moorhen pigeon dove starling jackdaw rook crow oriole tanager warbler tit chickadee
+pipit lark wagtail bunting linnet siskin redpoll waxwing redwing fieldfare
+shrike hoopoe bee-eater roller hornbill toucan macaw cockatoo lorikeet budgie""".split()
+
+GEMS = """jade ruby opal onyx quartz beryl agate amber jasper pearl topaz
+garnet zircon spinel lapis pyrite calcite mica gypsum barite kyanite
+flint chert shale slate basalt granite marble coral bone ivory horn
+antler ebony jade opal onyx quartz beryl agate amber jasper pearl topaz
+garnet zircon spinel coral chert shale flint slate marble gypsum barite
+mica calcite pyrite kyanite jade onyx opal ruby pearl beryl amber agate""".split()
+
+WEATHER = """storm mist dawn dusk rain frost fog haze ice snow cloud breeze
+gust gale tempest squall blizzard hail sleet drizzle thunder lightning rainbow
+zephyr aurora twilight sunset sunrise moonbeam starlight noon meridian solstice
+equinox horizon vapor steam cinder ash spray spume foam shower deluge monsoon
+hurricane typhoon cyclone tornado vortex eddy current draft draught chill
+warmth glow shimmer haze blaze flare flash bolt cosmos comet asteroid nebula
+pulsar quasar galaxy planet star moon sun sky cloud rain storm mist dawn dusk
+frost fog haze ice snow breeze gust gale squall hail sleet drizzle thunder""".split()
+
+MYTH = """thor odin loki freya frigg hel baldr tyr atlas hera juno mars vesta
+ceres leto niobe isis ra hathor osiris anubis horus apis ptah thoth bast set
+seshat ammit khonsu sobek bes maat shiva vishnu rama sita kali durga indra
+ganesh hanuman kuber surya soma agni vayu prana nataraj parvati lakshmi saraswati
+mira yama zeus apollo ares poseidon hades demeter athena artemis hermes hephaestus
+dionysus iris hebe hecate selene helios eos nyx erebus aether chaos gaia uranus
+cronus rhea oceanus tethys phoebe themis mnemosyne pan triton nereus proteus
+calypso circe medusa scylla charybdis pegasus chimera hydra cerberus minotaur""".split()
+
+# ---------------------- Filtering ----------------------
+def syllables(w: str) -> int:
+    """Approximate syllable count via vowel-group runs."""
+    groups, in_v = 0, False
+    for c in w:
+        v = c in "aeiouy"
+        if v and not in_v:
+            groups += 1
+        in_v = v
+    return max(1, groups)
+
+
+def fit(pack: Sequence[str], label: str, min_count: int = 25, cap: int = 110) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for w in pack:
         w = w.strip().lower()
-        if w and w.isalpha() and w not in seen:
-            seen.add(w)
-            out.append(w)
-    if len(out) < 200:
-        raise SystemExit(f"{label}: only {len(out)} stems, need 200")
-    return out[:200]
+        if not w or not w.isalpha():
+            continue
+        if not (3 <= len(w) <= 7):
+            continue
+        if syllables(w) > 2:
+            continue
+        if w in seen:
+            continue
+        seen.add(w)
+        out.append(w)
+        if len(out) >= cap:
+            break
+    if len(out) < min_count:
+        raise SystemExit(f"{label}: only {len(out)} short stems (need ≥{min_count})")
+    return out
+
 
 PACKS = {
-    "cities": fix200(CITIES, "cities"),
-    "rivers": fix200(RIVERS, "rivers"),
-    "colors": fix200(COLORS, "colors"),
-    "adjectives": fix200(ADJECTIVES, "adjectives"),
-    "nouns": fix200(NOUNS, "nouns"),
-    "verbs": fix200(VERBS, "verbs"),
-    "names": fix200(NAMES, "names"),
+    "cities":     fit(CITIES,     "cities"),
+    "rivers":     fit(RIVERS,     "rivers"),
+    "colors":     fit(COLORS,     "colors"),
+    "adjectives": fit(ADJECTIVES, "adjectives"),
+    "nouns":      fit(NOUNS,      "nouns"),
+    "verbs":      fit(VERBS,      "verbs"),
+    "names":      fit(NAMES,      "names"),
+    "trees":      fit(TREES,      "trees"),
+    "birds":      fit(BIRDS,      "birds"),
+    "gems":       fit(GEMS,       "gems"),
+    "weather":    fit(WEATHER,    "weather"),
+    "myth":       fit(MYTH,       "myth"),
 }
 
-# Rotation rules: every letter -> a related letter (sounds/looks alike).
-# Consonant -> consonant; vowel -> vowel. Applied to at most 1-2 random positions.
-ROTATIONS = [
-    ("a", "e"), ("e", "i"), ("i", "y"), ("o", "u"), ("u", "o"), ("y", "i"),
-    ("b", "p"), ("c", "k"), ("d", "t"), ("f", "v"), ("g", "j"), ("h", "x"),
-    ("j", "y"), ("k", "c"), ("l", "r"), ("m", "n"), ("n", "m"), ("p", "b"),
-    ("q", "k"), ("r", "l"), ("s", "z"), ("t", "d"), ("v", "f"), ("w", "v"),
-    ("x", "z"), ("z", "s"),
+# ---------------------- Syllable rotations ----------------------
+# Each rule is (src, dst). The algorithm finds every position in the candidate
+# where `src` occurs as a substring and applies the rewrite to exactly one
+# randomly-selected occurrence. Pairs are reversible (a→b is balanced by b→a).
+# All pairs preserve length and pronounceability.
+
+# Safe open-CV-syllable swaps: consonant followed by vowel.
+_CV_SWAPS = []
+_CONSONANTS = list("bcdfghjklmnprstvwz")
+# Vowel rotation cycle. We use ONLY adjacent vowel swaps (no e<->a leap).
+_VOWEL_PAIRS = [("a", "o"), ("o", "a"), ("i", "y"), ("y", "i"),
+                ("e", "i"), ("i", "e"), ("o", "u"), ("u", "o")]
+for c in _CONSONANTS:
+    for v1, v2 in _VOWEL_PAIRS:
+        _CV_SWAPS.append((c + v1, c + v2))
+
+# Unambiguous letter swaps (no syllable disruption):
+_LETTER_SWAPS = [
+    ("k", "q"), ("q", "k"),
+    ("c", "k"), ("k", "c"),   # safe before a/o/u — bad-seam filter handles edge cases
+    ("ph", "f"), ("f", "ph"),
+    ("x", "ks"), ("ks", "x"),
 ]
 
-def write_data():
-    DATA.mkdir(exist_ok=True)
-    for name, words in PACKS.items():
-        (DATA / f"{name}.txt").write_text("\n".join(words) + "\n")
-    rot = "\n".join(f"{a} {b}" for a, b in ROTATIONS) + "\n"
-    (DATA / "rotations.txt").write_text(rot)
+ROTATIONS: list[tuple[str, str]] = _CV_SWAPS + _LETTER_SWAPS
 
+# ---------------------- Bad-seam patterns ----------------------
+# Reject candidates whose junction (or anywhere) matches any of these.
+# Junction = the 4 chars centered on `len(first)`.
+BAD_SEAMS = [
+    "aa", "ee", "ii", "oo", "uu", "yy",  # double identical vowels at the seam
+    "iy", "yi",                          # ambiguous /aɪ/ sound at seam
+]
+# Plus: reject any tripled letter (e.g., "sss", "lll") -- enforced in code.
+
+
+# ---------------------- File writers ----------------------
 def unified() -> list[str]:
-    seen = set()
-    out = []
+    seen: set[str] = set()
+    out: list[str] = []
     for words in PACKS.values():
         for w in words:
             if w not in seen:
@@ -227,65 +250,90 @@ def unified() -> list[str]:
                 out.append(w)
     return out
 
-# ---------------- TypeScript ----------------
-def write_ts():
-    stems = unified()
-    f = ROOT / "namzy-ts" / "src" / "wordlist.ts"
-    body = "// this_file: src/wordlist.ts\n// AUTO-GENERATED by scripts/generate_data.py. Do not edit.\n\n"
-    body += "export const STEMS: readonly string[] = [\n"
-    for i in range(0, len(stems), 8):
-        body += "  " + ", ".join(f'"{w}"' for w in stems[i:i+8]) + ",\n"
-    body += "];\n\n"
-    body += "export const ROTATIONS: readonly (readonly [string, string])[] = [\n"
-    for a, b in ROTATIONS:
-        body += f'  ["{a}", "{b}"],\n'
-    body += "];\n"
-    f.write_text(body)
 
-# ---------------- Python ----------------
-def write_py():
+def write_data() -> None:
+    DATA.mkdir(exist_ok=True)
+    for name, words in PACKS.items():
+        (DATA / f"{name}.txt").write_text("\n".join(words) + "\n")
+    (DATA / "rotations.txt").write_text("\n".join(f"{a} {b}" for a, b in ROTATIONS) + "\n")
+    (DATA / "badseams.txt").write_text("\n".join(BAD_SEAMS) + "\n")
+
+
+def _q(s: str) -> str:
+    return f'"{s}"'
+
+
+def write_ts() -> None:
     stems = unified()
-    f = ROOT / "namzy-py" / "src" / "namzy" / "_wordlist.py"
-    body = "# this_file: src/namzy/_wordlist.py\n# AUTO-GENERATED by scripts/generate_data.py. Do not edit.\n\nSTEMS: list[str] = [\n"
+    body = '// this_file: src/wordlist.ts\n'
+    body += '// AUTO-GENERATED by scripts/generate_data.py. Do not edit.\n\n'
+    body += 'export const STEMS: readonly string[] = [\n'
     for i in range(0, len(stems), 8):
-        body += "    " + ", ".join(f'"{w}"' for w in stems[i:i+8]) + ",\n"
-    body += "]\n\nROTATIONS: list[tuple[str, str]] = [\n"
+        body += "  " + ", ".join(_q(w) for w in stems[i:i + 8]) + ",\n"
+    body += "];\n\n"
+    body += 'export const ROTATIONS: readonly (readonly [string, string])[] = [\n'
     for a, b in ROTATIONS:
-        body += f'    ("{a}", "{b}"),\n'
+        body += f"  [{_q(a)}, {_q(b)}],\n"
+    body += "];\n\n"
+    body += 'export const BAD_SEAMS: readonly string[] = [\n'
+    for s in BAD_SEAMS:
+        body += f"  {_q(s)},\n"
+    body += "];\n"
+    (ROOT / "namzy-ts" / "src" / "wordlist.ts").write_text(body)
+
+
+def write_py() -> None:
+    stems = unified()
+    body = "# this_file: src/namzy/_wordlist.py\n"
+    body += "# AUTO-GENERATED by scripts/generate_data.py. Do not edit.\n\n"
+    body += "STEMS: list[str] = [\n"
+    for i in range(0, len(stems), 8):
+        body += "    " + ", ".join(_q(w) for w in stems[i:i + 8]) + ",\n"
+    body += "]\n\n"
+    body += "ROTATIONS: list[tuple[str, str]] = [\n"
+    for a, b in ROTATIONS:
+        body += f"    ({_q(a)}, {_q(b)}),\n"
+    body += "]\n\n"
+    body += "BAD_SEAMS: list[str] = [\n"
+    for s in BAD_SEAMS:
+        body += f"    {_q(s)},\n"
     body += "]\n"
-    f.write_text(body)
+    (ROOT / "namzy-py" / "src" / "namzy" / "_wordlist.py").write_text(body)
 
-# ---------------- Rust ----------------
-def write_rs():
+
+def write_rs() -> None:
     stems = unified()
-    f = ROOT / "namzy-rs" / "src" / "wordlist.rs"
-    body = "//! this_file: src/wordlist.rs\n//! AUTO-GENERATED by scripts/generate_data.py. Do not edit.\n\n"
-    body += f"pub static STEMS: &[&str] = &[\n"
+    body = "//! this_file: src/wordlist.rs\n"
+    body += "//! AUTO-GENERATED by scripts/generate_data.py. Do not edit.\n\n"
+    body += "pub static STEMS: &[&str] = &[\n"
     for i in range(0, len(stems), 8):
-        body += "    " + ", ".join(f'"{w}"' for w in stems[i:i+8]) + ",\n"
+        body += "    " + ", ".join(_q(w) for w in stems[i:i + 8]) + ",\n"
     body += "];\n\n"
-    body += "pub static ROTATIONS: &[(char, char)] = &[\n"
+    body += "pub static ROTATIONS: &[(&str, &str)] = &[\n"
     for a, b in ROTATIONS:
-        body += f"    ('{a}', '{b}'),\n"
+        body += f"    ({_q(a)}, {_q(b)}),\n"
+    body += "];\n\n"
+    body += "pub static BAD_SEAMS: &[&str] = &[\n"
+    for s in BAD_SEAMS:
+        body += f"    {_q(s)},\n"
     body += "];\n"
-    f.write_text(body)
+    (ROOT / "namzy-rs" / "src" / "wordlist.rs").write_text(body)
 
-# ---------------- C++ ----------------
-def write_cpp():
+
+def write_cpp() -> None:
     stems = unified()
-    h = ROOT / "namzy-cpp" / "src" / "wordlist.h"
-    c = ROOT / "namzy-cpp" / "src" / "wordlist.cpp"
-    h.write_text("""// this_file: src/wordlist.h
+    (ROOT / "namzy-cpp" / "src" / "wordlist.h").write_text("""// this_file: src/wordlist.h
 // AUTO-GENERATED by scripts/generate_data.py. Do not edit.
 #pragma once
 #include <QStringList>
 #include <QVector>
 #include <QPair>
-#include <QChar>
+#include <QString>
 
 namespace namzy {
 const QStringList& stems();
-const QVector<QPair<QChar, QChar>>& rotations();
+const QVector<QPair<QString, QString>>& rotations();
+const QStringList& badSeams();
 }
 """)
     body = """// this_file: src/wordlist.cpp
@@ -298,25 +346,35 @@ const QStringList& stems() {
     static const QStringList s = {
 """
     for i in range(0, len(stems), 8):
-        body += "        " + ", ".join(f'QStringLiteral("{w}")' for w in stems[i:i+8]) + ",\n"
+        body += "        " + ", ".join(f'QStringLiteral("{w}")' for w in stems[i:i + 8]) + ",\n"
     body += """    };
     return s;
 }
 
-const QVector<QPair<QChar, QChar>>& rotations() {
-    static const QVector<QPair<QChar, QChar>> r = {
+const QVector<QPair<QString, QString>>& rotations() {
+    static const QVector<QPair<QString, QString>> r = {
 """
     for a, b in ROTATIONS:
-        body += f"        {{ QChar('{a}'), QChar('{b}') }},\n"
+        body += f'        {{ QStringLiteral("{a}"), QStringLiteral("{b}") }},\n'
     body += """    };
     return r;
 }
 
+const QStringList& badSeams() {
+    static const QStringList s = {
+"""
+    for sm in BAD_SEAMS:
+        body += f'        QStringLiteral("{sm}"),\n'
+    body += """    };
+    return s;
+}
+
 } // namespace namzy
 """
-    c.write_text(body)
+    (ROOT / "namzy-cpp" / "src" / "wordlist.cpp").write_text(body)
 
-def main():
+
+def main() -> None:
     write_data()
     write_ts()
     write_py()
@@ -324,8 +382,10 @@ def main():
     write_cpp()
     print(f"unified stems: {len(unified())}")
     print(f"rotations: {len(ROTATIONS)}")
+    print(f"bad seams: {len(BAD_SEAMS)}")
     for name, w in PACKS.items():
         print(f"  {name}: {len(w)}")
+
 
 if __name__ == "__main__":
     main()

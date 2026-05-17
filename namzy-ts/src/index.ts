@@ -1,6 +1,6 @@
 // this_file: src/index.ts
 
-import { applyRotations, buildName, mulberry32 } from "./mangle.js";
+import { applyRotation, buildName, mulberry32 } from "./mangle.js";
 import { ROTATIONS, STEMS } from "./wordlist.js";
 
 export interface NamzyOptions {
@@ -24,4 +24,4 @@ export function generateMany(count: number, opts?: NamzyOptions): string[] {
 }
 
 export { STEMS, ROTATIONS } from "./wordlist.js";
-export { applyRotations, buildName, mulberry32 };
+export { applyRotation, buildName, mulberry32 };

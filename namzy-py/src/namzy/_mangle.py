@@ -1,38 +1,53 @@
 # this_file: src/namzy/_mangle.py
-"""Build one name: pick two stems, concatenate, lightly rotate, capitalize."""
+"""Build a name: pick two short stems, validate the junction, apply one rotation."""
 
 from __future__ import annotations
 
 import random
 
-from ._wordlist import ROTATIONS, STEMS
+from ._wordlist import BAD_SEAMS, ROTATIONS, STEMS
 
-_ROT_MAP: dict[str, str] = dict(ROTATIONS)
+_MAX_LEN = 12
+_MAX_TRIES = 8
 
 
-def _rotate_at(s: str, pos: int) -> str:
-    ch = s[pos]
-    low = ch.lower()
-    repl = _ROT_MAP.get(low)
-    if repl is None:
+def _has_triple_letter(s: str) -> bool:
+    for i in range(2, len(s)):
+        if s[i] == s[i - 1] == s[i - 2]:
+            return True
+    return False
+
+
+def _junction_ugly(compound: str, junction: int) -> bool:
+    start = max(0, junction - 2)
+    end = min(len(compound), junction + 2)
+    win = compound[start:end]
+    return any(seam in win for seam in BAD_SEAMS)
+
+
+def apply_rotation(s: str, rng: random.Random) -> str:
+    """Apply exactly one rotation at a randomly chosen matching position."""
+    matches: list[tuple[int, str, str]] = []
+    for i in range(len(s)):
+        for src, dst in ROTATIONS:
+            if s[i:i + len(src)] == src:
+                matches.append((i, src, dst))
+    if not matches:
         return s
-    out = repl.upper() if ch.isupper() else repl
-    return s[:pos] + out + s[pos + 1:]
-
-
-def apply_rotations(compound: str, rng: random.Random) -> str:
-    """Apply 1 or 2 rotations on randomly selected positions."""
-    if not compound:
-        return compound
-    passes = 1 if rng.random() < 0.5 else 2
-    out = compound
-    for _ in range(passes):
-        out = _rotate_at(out, rng.randrange(len(out)))
-    return out
+    i, src, dst = matches[rng.randrange(len(matches))]
+    return s[:i] + dst + s[i + len(src):]
 
 
 def build_name(rng: random.Random) -> str:
-    a = rng.choice(STEMS)
-    b = rng.choice(STEMS)
-    rotated = apply_rotations(a + b, rng)
+    best = ""
+    for _ in range(_MAX_TRIES):
+        a = rng.choice(STEMS)
+        b = rng.choice(STEMS)
+        compound = a + b
+        if len(compound) > _MAX_LEN or _has_triple_letter(compound) or _junction_ugly(compound, len(a)):
+            best = best or compound
+            continue
+        rotated = apply_rotation(compound, rng)
+        return rotated[:1].upper() + rotated[1:]
+    rotated = apply_rotation(best, rng)
     return rotated[:1].upper() + rotated[1:]

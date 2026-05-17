@@ -4,9 +4,10 @@
 #include <QStringList>
 #include <QVector>
 #include <QPair>
-#include <QChar>
+#include <QString>
 
 namespace namzy {
 const QStringList& stems();
-const QVector<QPair<QChar, QChar>>& rotations();
+const QVector<QPair<QString, QString>>& rotations();
+const QStringList& badSeams();
 }

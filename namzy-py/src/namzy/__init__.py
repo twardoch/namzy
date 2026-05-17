@@ -6,8 +6,8 @@ from __future__ import annotations
 import random
 import time
 
-from ._mangle import apply_rotations, build_name
-from ._wordlist import ROTATIONS, STEMS
+from ._mangle import apply_rotation, build_name
+from ._wordlist import BAD_SEAMS, ROTATIONS, STEMS
 
 try:
     from .__version__ import __version__
@@ -17,10 +17,11 @@ except ModuleNotFoundError:
 __all__ = [
     "generate",
     "generate_many",
-    "apply_rotations",
+    "apply_rotation",
     "build_name",
     "STEMS",
     "ROTATIONS",
+    "BAD_SEAMS",
     "__version__",
 ]
 

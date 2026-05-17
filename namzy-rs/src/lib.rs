@@ -3,8 +3,8 @@
 mod mangle;
 mod wordlist;
 
-pub use mangle::{apply_rotations, build_name, Mulberry32};
-pub use wordlist::{ROTATIONS, STEMS};
+pub use mangle::{apply_rotation, build_name, Mulberry32};
+pub use wordlist::{BAD_SEAMS, ROTATIONS, STEMS};
 
 use std::time::{SystemTime, UNIX_EPOCH};
 

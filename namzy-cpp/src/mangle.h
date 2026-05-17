@@ -4,5 +4,5 @@
 #include <QString>
 #include <QRandomGenerator>
 
-QString applyRotations(const QString& compound, QRandomGenerator& rng);
+QString applyRotation(const QString& s, QRandomGenerator& rng);
 QString buildName(QRandomGenerator& rng);
