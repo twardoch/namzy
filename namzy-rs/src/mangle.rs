@@ -1,4 +1,6 @@
-// this_file: src/mangle.rs
+//! this_file: src/mangle.rs
+
+use crate::wordlist::{ROTATIONS, STEMS};
 
 pub struct Mulberry32 {
     state: u32,
@@ -6,7 +8,7 @@ pub struct Mulberry32 {
 
 impl Mulberry32 {
     pub fn new(seed: u64) -> Self {
-        let state = (seed ^ (seed >> 32)) as u32;
+        let state = ((seed ^ (seed >> 32)) as u32).wrapping_add(1);
         Self { state }
     }
 
@@ -24,55 +26,60 @@ impl Mulberry32 {
         }
         (self.next_u32() as usize) % n
     }
+
+    pub fn coin(&mut self) -> bool {
+        (self.next_u32() & 1) == 1
+    }
 }
 
-const ROTATION_RULES: [(char, char); 10] = [
-    ('c', 'q'),
-    ('f', 'v'),
-    ('k', 'c'),
-    ('q', 'k'),
-    ('s', 'z'),
-    ('z', 's'),
-    ('v', 'f'),
-    ('w', 'u'),
-    ('b', 'p'),
-    ('p', 'b'),
-];
-
-const ALL_ROTATIONS: u16 = (1 << ROTATION_RULES.len()) - 1;
-
-pub fn active_rotation_mask(rng: &mut Mulberry32) -> u16 {
-    let mut order = [0usize, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    let active_count = rng.range(ROTATION_RULES.len()) + 1;
-    for i in 0..active_count {
-        let swap = i + rng.range(order.len() - i);
-        order.swap(i, swap);
-    }
-    let mut mask = 0u16;
-    for idx in order.iter().take(active_count) {
-        mask |= 1 << idx;
-    }
-    mask
-}
-
-fn rotate_char(c: char, active_mask: u16) -> char {
-    let lower = c.to_ascii_lowercase();
-    for (idx, (src, dst)) in ROTATION_RULES.iter().enumerate() {
-        if (active_mask & (1 << idx)) != 0 && lower == *src {
-            return if c.is_ascii_uppercase() {
-                dst.to_ascii_uppercase()
-            } else {
-                *dst
-            };
+fn rotation_for(c: char) -> Option<char> {
+    let low = c.to_ascii_lowercase();
+    for (src, dst) in ROTATIONS {
+        if *src == low {
+            return Some(*dst);
         }
     }
-    c
+    None
 }
 
-pub fn mangle(word: &str) -> String {
-    mangle_with_mask(word, ALL_ROTATIONS)
+fn rotate_at(chars: &mut [char], pos: usize) {
+    if pos >= chars.len() {
+        return;
+    }
+    let ch = chars[pos];
+    if let Some(dst) = rotation_for(ch) {
+        chars[pos] = if ch.is_ascii_uppercase() {
+            dst.to_ascii_uppercase()
+        } else {
+            dst
+        };
+    }
 }
 
-pub fn mangle_with_mask(word: &str, active_mask: u16) -> String {
-    word.chars().map(|c| rotate_char(c, active_mask)).collect()
+pub fn apply_rotations(compound: &str, rng: &mut Mulberry32) -> String {
+    let mut chars: Vec<char> = compound.chars().collect();
+    if chars.is_empty() {
+        return String::new();
+    }
+    let passes = if rng.coin() { 1 } else { 2 };
+    for _ in 0..passes {
+        let pos = rng.range(chars.len());
+        rotate_at(&mut chars, pos);
+    }
+    chars.into_iter().collect()
+}
+
+fn capitalize(s: &str) -> String {
+    let mut c = s.chars();
+    match c.next() {
+        None => String::new(),
+        Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+    }
+}
+
+pub fn build_name(rng: &mut Mulberry32) -> String {
+    let a = STEMS[rng.range(STEMS.len())];
+    let b = STEMS[rng.range(STEMS.len())];
+    let compound = format!("{}{}", a, b);
+    capitalize(&apply_rotations(&compound, rng))
 }

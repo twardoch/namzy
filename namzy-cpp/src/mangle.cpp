@@ -1,79 +1,57 @@
 // this_file: namzy-cpp/src/mangle.cpp
 #include "mangle.h"
+#include "wordlist.h"
+#include <QHash>
 
-struct RotationRule
+static QHash<QChar, QChar> buildRotationMap()
 {
-    ushort from;
-    ushort to;
-};
-
-static const RotationRule ROTATION_RULES[] = {
-    { 'c', 'q' },
-    { 'f', 'v' },
-    { 'k', 'c' },
-    { 'q', 'k' },
-    { 's', 'z' },
-    { 'z', 's' },
-    { 'v', 'f' },
-    { 'w', 'u' },
-    { 'b', 'p' },
-    { 'p', 'b' },
-};
-
-quint16 allRotationRules()
-{
-    return static_cast<quint16>((1U << (sizeof(ROTATION_RULES) / sizeof(ROTATION_RULES[0]))) - 1U);
+    QHash<QChar, QChar> m;
+    for (const auto& p : namzy::rotations()) {
+        m.insert(p.first, p.second);
+    }
+    return m;
 }
 
-static QChar rotateConsonant(QChar ch, quint16 activeMask)
+static const QHash<QChar, QChar>& rotationMap()
 {
+    static const QHash<QChar, QChar> m = buildRotationMap();
+    return m;
+}
+
+static void rotateAt(QString& s, int pos)
+{
+    if (pos < 0 || pos >= s.size()) return;
+    const QChar ch = s.at(pos);
     const bool upper = ch.isUpper();
     const QChar lo = ch.toLower();
-    const ushort code = lo.unicode();
-    for (int i = 0; i < static_cast<int>(sizeof(ROTATION_RULES) / sizeof(ROTATION_RULES[0])); ++i) {
-        if ((activeMask & (1U << i)) != 0 && code == ROTATION_RULES[i].from) {
-            const QChar out(ROTATION_RULES[i].to);
-            return upper ? out.toUpper() : out;
-        }
-    }
-    return ch;
+    auto it = rotationMap().find(lo);
+    if (it == rotationMap().end()) return;
+    s[pos] = upper ? it.value().toUpper() : it.value();
 }
 
-QString mangle(const QString& word, quint16 activeMask)
+QString applyRotations(const QString& compound, QRandomGenerator& rng)
 {
-    QString result;
-    result.reserve(word.size());
-    for (const QChar& c : word) {
-        result.append(rotateConsonant(c, activeMask));
+    if (compound.isEmpty()) return compound;
+    QString out = compound;
+    const int passes = (rng.bounded(2) == 0) ? 1 : 2;
+    for (int i = 0; i < passes; ++i) {
+        const int pos = static_cast<int>(rng.bounded(static_cast<quint32>(out.size())));
+        rotateAt(out, pos);
     }
-    return result;
+    return out;
 }
 
-static bool isVowel(QChar c)
+static QString capitalize(const QString& s)
 {
-    switch (c.toLower().unicode()) {
-    case 'a': case 'e': case 'i': case 'o': case 'u': case 'y':
-        return true;
-    default:
-        return false;
-    }
+    if (s.isEmpty()) return s;
+    return QString(s.at(0).toUpper()) + s.mid(1);
 }
 
-QString joinClean(const QString& a, const QString& b)
+QString buildName(QRandomGenerator& rng)
 {
-    QString head = a;
-    QString tail = b;
-    for (int pass = 0; pass < 2; ++pass) {
-        if (head.isEmpty() || tail.isEmpty()) break;
-        const QChar last = head.at(head.size() - 1);
-        const QChar first = tail.at(0);
-        if (last == first) {
-            tail.remove(0, 1);
-        } else if (isVowel(last) && isVowel(first)) {
-            tail.remove(0, 1);
-        } else {
-            break;
-        }
-    }
-    return head + tail;
+    const QStringList& stems = namzy::stems();
+    const int n = stems.size();
+    const QString a = stems.at(static_cast<int>(rng.bounded(static_cast<quint32>(n))));
+    const QString b = stems.at(static_cast<int>(rng.bounded(static_cast<quint32>(n))));
+    return capitalize(applyRotations(a + b, rng));
 }

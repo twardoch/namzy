@@ -1,41 +1,38 @@
 # this_file: src/namzy/__init__.py
-"""namzy — fun human-friendly project name generator."""
+"""namzy — compact, memorable, unique project name generator."""
 
 from __future__ import annotations
 
 import random
 import time
 
-from ._mangle import active_rotation_rules, join_clean, mangle
-from ._wordlist import COMMON, GEO
+from ._mangle import apply_rotations, build_name
+from ._wordlist import ROTATIONS, STEMS
 
 try:
     from .__version__ import __version__
 except ModuleNotFoundError:
     __version__ = "0+unknown"
 
-__all__ = ["generate", "__version__"]
-
-def _pick_words(rng: random.Random) -> tuple[str, str]:
-    """Return two raw lowercase words in a random order."""
-    geo = rng.choice(GEO).lower()
-    common = rng.choice(COMMON).lower()
-    if rng.random() < 0.5:
-        return geo, common
-    return common, geo
+__all__ = [
+    "generate",
+    "generate_many",
+    "apply_rotations",
+    "build_name",
+    "STEMS",
+    "ROTATIONS",
+    "__version__",
+]
 
 
 def generate(seed: int | None = None) -> str:
-    """Generate a fun project name.
-
-    Picks two words, fuses them with junction cleanup, applies consonant
-    rotation, and capitalizes the first letter.
-    """
+    """Generate a single name. Seed defaults to current time."""
     if seed is None:
         seed = time.time_ns()
-    rng = random.Random(seed)
+    return build_name(random.Random(seed))
 
-    a, b = _pick_words(rng)
-    fused = join_clean(a, b)
-    rotated = mangle(fused, active_rotation_rules(rng))
-    return rotated[:1].upper() + rotated[1:]
+
+def generate_many(count: int, seed: int | None = None) -> list[str]:
+    """Generate `count` names with seeds derived from `seed`."""
+    base = time.time_ns() if seed is None else seed
+    return [generate(base + i) for i in range(count)]

@@ -1,35 +1,27 @@
 // this_file: src/index.ts
 
-import { activeRotationMask, joinClean, mangle, mulberry32 } from "./mangle.js";
-import { COMMON, GEO } from "./wordlist.js";
+import { applyRotations, buildName, mulberry32 } from "./mangle.js";
+import { ROTATIONS, STEMS } from "./wordlist.js";
 
 export interface NamzyOptions {
-	seed?: number;
+  seed?: number;
 }
 
-function capitalize(s: string): string {
-	return s.charAt(0).toUpperCase() + s.slice(1);
+/** Generate one namzy name. Default seed is the current timestamp. */
+export function generate(opts?: NamzyOptions): string {
+  const seed = opts?.seed ?? Date.now();
+  return buildName(mulberry32(seed));
 }
 
-function pick<T>(arr: T[], rng: () => number): T {
-	return arr[Math.floor(rng() * arr.length)];
+/** Generate `count` names. Distinct seeds derived from the base seed. */
+export function generateMany(count: number, opts?: NamzyOptions): string[] {
+  const base = opts?.seed ?? Date.now();
+  const out: string[] = [];
+  for (let i = 0; i < count; i++) {
+    out.push(generate({ seed: base + i * 2654435761 }));
+  }
+  return out;
 }
 
-/**
- * Generate a single fused, mangled namzy name.
- * Two raw words → junction-cleaned fusion → consonant rotation → capitalize.
- */
-export async function generate(opts?: NamzyOptions): Promise<string> {
-	const seed = opts?.seed ?? Date.now();
-	const rng = mulberry32(seed);
-
-	const w1 = pick(GEO, rng).toLowerCase();
-	const w2 = pick(COMMON, rng).toLowerCase();
-	const [first, second] = rng() < 0.5 ? [w1, w2] : [w2, w1];
-
-	const fused = joinClean(first, second);
-	return capitalize(mangle(fused, activeRotationMask(rng)));
-}
-
-export { COMMON, GEO } from "./wordlist.js";
-export { activeRotationMask, joinClean, mangle, mulberry32 };
+export { STEMS, ROTATIONS } from "./wordlist.js";
+export { applyRotations, buildName, mulberry32 };

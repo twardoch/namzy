@@ -4,24 +4,21 @@
 import { generate } from "./index.js";
 
 const HELP = `
-namzy — generate fun fused project names
+namzy — generate compact, memorable, unique names
 
 Usage:
   namzy [options]
 
 Options:
   --count <N>     Number of names to generate (default: 1)
+  --seed <N>      Integer seed (default: current timestamp)
   --help          Show this help
-
-Examples:
-  namzy
-  namzy --count 5
 `.trimStart();
 
-function parseArgs(argv: string[]): { count: number } {
+function parseArgs(argv: string[]): { count: number; seed?: number } {
   const args = argv.slice(2);
   let count = 1;
-
+  let seed: number | undefined;
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     switch (arg) {
@@ -33,10 +30,19 @@ function parseArgs(argv: string[]): { count: number } {
       case "--count": {
         const n = parseInt(args[++i], 10);
         if (Number.isNaN(n) || n < 1) {
-          process.stderr.write(`--count must be a positive integer\n`);
+          process.stderr.write("--count must be a positive integer\n");
           process.exit(1);
         }
         count = n;
+        break;
+      }
+      case "--seed": {
+        const n = parseInt(args[++i], 10);
+        if (Number.isNaN(n)) {
+          process.stderr.write("--seed must be an integer\n");
+          process.exit(1);
+        }
+        seed = n;
         break;
       }
       default:
@@ -44,19 +50,15 @@ function parseArgs(argv: string[]): { count: number } {
         process.exit(1);
     }
   }
-  return { count };
+  return { count, seed };
 }
 
-async function main(): Promise<void> {
-  const { count } = parseArgs(process.argv);
-  const base = Date.now();
+function main(): void {
+  const { count, seed } = parseArgs(process.argv);
+  const base = seed ?? Date.now();
   for (let i = 0; i < count; i++) {
-    const name = await generate({ seed: base + i * 1337 });
-    process.stdout.write(`${name}\n`);
+    process.stdout.write(`${generate({ seed: base + i * 2654435761 })}\n`);
   }
 }
 
-main().catch((err) => {
-  process.stderr.write(`Error: ${err instanceof Error ? err.message : String(err)}\n`);
-  process.exit(1);
-});
+main();
