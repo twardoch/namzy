@@ -1,6 +1,6 @@
 {
   "name": "@twardoch/namzy",
-  "version": "1.0.23",
+  "version": "1.0.25",
   "description": "Generates fun fused human-friendly project names",
   "license": "MIT",
   "type": "module",
@@ -19,7 +19,9 @@
     "build": "tsc",
     "build:web": "esbuild src/web.ts --bundle --format=iife --global-name=namzy --outfile=../docs/namzy.js --target=es2020",
     "start": "node dist/cli.js",
-    "dev": "tsx src/cli.ts"
+    "dev": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts"
   },
   "engines": {
     "node": ">=18"

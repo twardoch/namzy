@@ -28,6 +28,8 @@ build/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.coverage
+uv.lock
 
 # Rust (namzy-rs/)
 target/
@@ -59,6 +61,3 @@ docs/.bundle/
 docs/vendor/bundle/
 /.playwright-mcp
 /.sisyphus
-
-# Generated package versions
-namzy-py/src/namzy/__version__.py

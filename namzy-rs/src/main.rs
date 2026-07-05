@@ -1,7 +1,7 @@
 // this_file: src/main.rs
 
 use clap::Parser;
-use namzy::{Options, generate};
+use namzy::{generate, Options};
 
 #[derive(Parser, Debug)]
 #[command(name = "namzy", about = "Generate fun human-friendly project names")]

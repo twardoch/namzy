@@ -12,10 +12,8 @@ _MAX_TRIES = 8
 
 
 def _has_triple_letter(s: str) -> bool:
-    for i in range(2, len(s)):
-        if s[i] == s[i - 1] == s[i - 2]:
-            return True
-    return False
+    """True if any letter repeats three times in a row (e.g. the ``aaa`` in ``sahaaardvark``)."""
+    return any(s[i] == s[i - 1] == s[i - 2] for i in range(2, len(s)))
 
 
 def _junction_ugly(compound: str, junction: int) -> bool:
@@ -30,12 +28,12 @@ def apply_rotation(s: str, rng: random.Random) -> str:
     matches: list[tuple[int, str, str]] = []
     for i in range(len(s)):
         for src, dst in ROTATIONS:
-            if s[i:i + len(src)] == src:
+            if s[i : i + len(src)] == src:
                 matches.append((i, src, dst))
     if not matches:
         return s
     i, src, dst = matches[rng.randrange(len(matches))]
-    return s[:i] + dst + s[i + len(src):]
+    return s[:i] + dst + s[i + len(src) :]
 
 
 def build_name(rng: random.Random) -> str:
@@ -44,7 +42,12 @@ def build_name(rng: random.Random) -> str:
         a = rng.choice(STEMS)
         b = rng.choice(STEMS)
         compound = a + b
-        if len(compound) > _MAX_LEN or _has_triple_letter(compound) or _junction_ugly(compound, len(a)):
+        # Reject compounds that are too long, stutter, or fuse into an ugly seam.
+        if (
+            len(compound) > _MAX_LEN
+            or _has_triple_letter(compound)
+            or _junction_ugly(compound, len(a))
+        ):
             best = best or compound
             continue
         rotated = apply_rotation(compound, rng)

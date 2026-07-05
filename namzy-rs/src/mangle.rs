@@ -84,7 +84,10 @@ pub fn build_name(rng: &mut Mulberry32) -> String {
         let a = STEMS[rng.range(STEMS.len())];
         let b = STEMS[rng.range(STEMS.len())];
         let compound = format!("{}{}", a, b);
-        if compound.len() > MAX_LEN || has_triple_letter(&compound) || junction_ugly(&compound, a.len()) {
+        if compound.len() > MAX_LEN
+            || has_triple_letter(&compound)
+            || junction_ugly(&compound, a.len())
+        {
             if best.is_empty() {
                 best = compound;
             }

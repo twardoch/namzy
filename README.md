@@ -1,8 +1,20 @@
 # namzy
 
-`namzy` generates fun, human-friendly project names for software or typefaces. It picks two words from a bundled vocabulary, fuses them at a clean junction so the result reads as a single word, and runs the seam through a small consonant rotation. Each generated name activates a seed-derived subset of 1 to 10 replacement rules, so some names use only a few swaps while others can use the full map. The output looks invented but stays pronounceable — e.g. `Pariznimble`, `Luzacanlet`, `Boyzcraeft`.
+`namzy` generates fun, human-friendly project names for software or typefaces. It fuses two short words from a bundled vocabulary into a single token, rejects ugly seams, and nudges one syllable so the result looks invented but stays pronounceable — e.g. `Pillarson`, `Hazeldovir`, `Omorthames`, `Crispogra`.
 
 A live demo lives in [`docs/index.md`](./docs/index.md) (also browsable via GitHub Pages once enabled).
+
+```bash
+pip install namzy && namzy --count 5      # Python
+npx @twardoch/namzy --count 5             # TypeScript
+cargo install namzy && namzy --count 5    # Rust
+```
+
+## Visual
+
+<img src="docs/assets/icon.png" alt="A signpost whose two arrows fuse into one, half in daylight and half in moonlight — two words joined into a single place." width="180">
+
+Two arrows fused into one signpost: two words joined into a single place.
 
 ## Repository layout
 
@@ -19,20 +31,16 @@ The implementations are siblings, not a monorepo with shared code. Each follows 
 
 ## Shared contract
 
-All four implementations behave the same way:
+All four implementations run the same four steps:
 
-1. **Two words → one fused name.** Always. There is no "single word" or "Two Word" mode — the result is always one fused token that *looks* like one word but is two.
-2. **Junction cleanup at the seam.** When the end of word 1 meets the start of word 2:
-   - if the letters are the same, drop one;
-   - if both letters are vowels (`a e i o u y`), drop one.
-   Applied up to twice. This removes awkward joins like `nordaarctic` → `nordarctic`.
-3. **Consonant rotation pass.** A small, case-preserving per-letter map applied to the fused string:
-   `c→q · f→v · k→c · q→k · s→z · z→s · v→f · w→u · b→p · p→b`
-4. **Timestamp seed.** Seeded by `Date.now()` / `time_ns()` / system clock by default; a caller-supplied seed gives reproducible output and selects which replacement rules are active.
-5. **Vocabulary.** Basic `A-Za-z` only, drawn from geographic names and common Latin-alphabet words. No diacritics.
-6. **Bundled vocabulary only.** Shared 500 geographic words x 500 common words, joined in either order, for 500,000 raw ordered pairings before seam cleanup and replacement collisions. No network.
+1. **Two stems → one fused token.** Pick two stems at random and concatenate them. Stems are hand-curated across 12 discipline packs (cities, rivers, colors, adjectives, nouns, verbs, names, trees, birds, gems, weather, myth), each `≤2` syllables and `≤7` characters. The bundled, deduplicated list holds ~950 stems.
+2. **Reject ugly fusions.** Discard the candidate and retry (up to 8 times) if it exceeds 12 characters, repeats a letter three times in a row, or forms a bad seam at the junction — a doubled-identical-vowel sound (`aa ee ii oo uu yy iy yi`) in the `±2`-character window around the join.
+3. **One syllable rotation.** Find every spot where a rotation rule matches and apply exactly **one**, chosen at random. Rotations are syllable-preserving CV swaps (`pa→po`, `ti→ty`, `ki→ky` …) plus a few unambiguous letter swaps (`k↔q`, `c↔k`, `ph↔f`, `x↔ks`). There is no class-wide single-letter rotation.
+4. **Capitalize the first letter.**
 
-The four implementations are equivalent in spirit, not bit-identical. The TS implementation is the reference for the demo page.
+Seeded by the current timestamp (`Date.now()` / `time_ns()` / system clock) by default; pass an integer seed for reproducible output. ASCII only, no network.
+
+The four implementations are equivalent **in spirit, not bit-identical** — each language seeds and draws from its own RNG, so the same seed yields different names across languages. `scripts/generate_data.py` is the single source of truth for the vocabulary; it regenerates every per-language wordlist. The TypeScript implementation is the reference for the demo page.
 
 ## Build & publish
 
