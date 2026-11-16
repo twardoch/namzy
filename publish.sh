@@ -3,7 +3,7 @@
 # Usage: ./publish.sh [--dry-run]
 #
 # TS  → npm     (needs `npm login` or NPM_TOKEN env)
-# Py  → PyPI    (needs PYPI_TOKEN env or `~/.pypirc`)
+# Py  → PyPI    (Trusted Publishing via scripts/pypi-upload.sh; needs `gh auth`)
 # Rs  → crates  (needs `cargo login`)
 # C++ →         (not published — built only)
 set -euo pipefail
@@ -144,28 +144,17 @@ pushd namzy-ts >/dev/null
 popd >/dev/null
 
 # --- Python → PyPI -------------------------------------------------------
+# Uploaded through Trusted Publishing (no token): scripts/pypi-upload.sh stages
+# the files on a draft GitHub release and .github/workflows/pypi-upload.yml
+# uploads them.
 say "Publishing namzy-py → PyPI"
-pushd namzy-py >/dev/null
-  if have uv; then
-    if [[ -n "$DRY" ]]; then
-      warn "uv publish has no --dry-run; listing artifacts only"
-      ls -la dist/
-    elif pypi_version_exists; then
-      warn "namzy $VERSION already exists on PyPI — skipping"
-    else
-      uv publish
-    fi
-  else
-    have twine || python3 -m pip install --quiet --upgrade twine
-    if [[ -n "$DRY" ]]; then
-      python3 -m twine check dist/*
-    elif pypi_version_exists; then
-      warn "namzy $VERSION already exists on PyPI — skipping"
-    else
-      python3 -m twine upload dist/*
-    fi
-  fi
-popd >/dev/null
+if [[ -n "$DRY" ]]; then
+  "$ROOT/scripts/pypi-upload.sh" --dry-run namzy-py/dist/*
+elif pypi_version_exists; then
+  warn "namzy $VERSION already exists on PyPI — skipping"
+else
+  "$ROOT/scripts/pypi-upload.sh" namzy-py/dist/*
+fi
 
 # --- Rust → crates.io ----------------------------------------------------
 say "Publishing namzy-rs → crates.io"

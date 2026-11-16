@@ -1,6 +1,7 @@
 name: Release
 
-# Publishes every package to its registry when a vX.Y.Z tag is pushed.
+# Publishes npm and crates.io packages when a vX.Y.Z tag is pushed. PyPI is
+# published by ./publish.sh through scripts/pypi-upload.sh (Trusted Publishing).
 # Each publish step runs only when its registry token is configured, so the
 # workflow never fails on a repo that has not wired up a given secret.
 
@@ -36,13 +37,6 @@ jobs:
         env:
           NAMZY_VERSION: ${{ github.ref_name }}
         run: NAMZY_VERSION="${GITHUB_REF_NAME}" ./build.sh
-
-      - name: Publish namzy-py → PyPI
-        if: ${{ env.UV_PUBLISH_TOKEN != '' }}
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        working-directory: namzy-py
-        run: uv publish
 
       - name: Publish namzy-ts → npm
         if: ${{ env.NODE_AUTH_TOKEN != '' }}
